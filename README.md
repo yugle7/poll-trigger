@@ -1,17 +1,17 @@
-```bash
+"""bash
 yc iam create-token
-```
+"""
 
-```bash
+"""bash
 curl \
   --request POST \
   --url https://api.telegram.org/bot<токен_бота>/setWebhook \
   --header 'content-type: application/json' \
   --data '{"url": "https://<домен_API-шлюза>/fshtb-function"}'
-```
+"""
 
-```bash
+"""bash
 curl \
   --request POST \
   --url https://api.telegram.org/bot<токен_бота>/deleteWebhook 
-```
+"""

@@ -9,63 +9,96 @@ def get_id(a, b):
     return CityHash64(str(a) + ' ' + str(b).lower().strip())
 
 
-def what(cron, dh):
+def what(cron, user):
     question = cron['poll']['question']
     stopped = not cron['create']
-    answers = [f'{question}` {"остановлен" if stopped else "запущен"}`']
+    answers = [f'"{question}" {"остановлен" if stopped else "запущен"}']
 
     if cron['create']:
-        create = datetime.fromtimestamp(cron['create'] + 3600 * dh)
+        time_zone = timedelta(hours=user['time_zone'])
+        create = datetime.fromtimestamp(cron['create']) + time_zone
         month = MONTH[create.month - 1]
-        answers.append(f'— создам` {create.hour}:00 {create.day} {month}`')
+        answers.append(f'— создам {create.hour}:00 {create.day} {month}')
 
-    trigger = cron.get('trigger')
-    if trigger:
-        if trigger['create']:
-            answers.append(f'— создаю` {when(trigger["create"], dh)}`')
-        if trigger['notify']:
-            answers.append(f'— напоминаю` {when(trigger["notify"], dh)}`')
+    trigger = cron['trigger']
+    if trigger['create']:
+        answers.append(f'— создаю {when(trigger["create"])}')
+    if trigger['notify']:
+        answers.append(f'— напоминаю {when(trigger["notify"])}')
 
     return '\n'.join(answers)
 
 
-def when(triggers, dh):
+def when(triggers):
     answers = []
     for t in triggers:
-        t = shift(t, dh)
         hour = t['hour']
-        weekday = t.get('weekday')
-        if weekday is None:
-            day = 'каждый день'
+
+        y = t.get('year')
+        m = t.get('month')
+        d = t.get('day')
+
+        if 'weekday' in t:
+            answer = WEEKDAY[t['weekday']]
+        elif y and m and d:
+            answer = f'{d} {MONTH[m - 1]} {y}'
         else:
-            day = WEEKDAY[weekday]
-        answers.append(f'{day} {hour:02}:00')
+            if d:
+                if m:
+                    answer = f'ежегодно {d} {MONTH[m - 1]}'
+                else:
+                    answer = f'ежемесячно {d} числа'
+            elif m:
+                answer = f'ежедневно весь {MONTH[m - 1]}'
+            else:
+                answer = f'каждый день'
+            if y:
+                answer += f'в {y} году'
+        answers.append(f'{answer} {hour:02}:00')
     return ', '.join(answers)
 
 
-def next(trigger):
-    now = datetime.now()
-
+def get_next(trigger):
+    time_zone = timedelta(hours=trigger['time_zone'])
+    now = datetime.now() + time_zone
     t = now.replace(hour=trigger['hour'], minute=0, second=0, microsecond=0)
-    weekday = trigger.get('weekday')
-    if weekday is not None:
-        days = (weekday - now.weekday()) % 7
-        if days == 0:
-            if t.hour <= now.hour:
-                t += timedelta(days=7)
-        else:
+
+    y = trigger.get('year')
+    m = trigger.get('month')
+    d = trigger.get('day')
+
+    if y:
+        t = t.replace(year=y, month=1, day=1)
+    if m:
+        t = t.replace(month=m, day=1)
+    if d:
+        t = t.replace(day=d)
+
+    if 'weekday' in trigger:
+        days = (trigger['weekday'] - t.weekday()) % 7
+        if days:
             t += timedelta(days=days)
-    else:
-        if t.hour <= now.hour:
+        elif t <= now:
+            t += timedelta(days=7)
+
+    elif t <= now:
+        if y and m and d:
+            return 0
+
+        if d:
+            if m:
+                t = t.replace(year=t.year + 1)
+            elif t.month == 12:
+                t = t.replace(year=t.year + 1, month=1)
+            else:
+                t = t.replace(month=t.month + 1)
+        else:
             t += timedelta(days=1)
 
-    return int(t.timestamp())
+    if m and t.month != m:
+        return 0
 
-
-def shift(trigger, dh):
-    w = trigger.get('weekday')
-    h = trigger['hour'] + dh
-    return {'hour': h % 24} if w is None else {'weekday': (w + h // 24) % 7, 'hour': h % 24}
+    return int((t - time_zone).timestamp())
 
 
 class Token:
@@ -83,81 +116,164 @@ def stem(word):
 
 
 def get_command(text):
-    change = False
+    action = None
     for w in text.split():
         a = ACTIONS.get(stem(w))
         if a in ('stop', 'resume', 'delete', 'show'):
             return a
         if a in ('create', 'notify'):
-            if any(w.isdigit() for w in text):
-                change = True
-            else:
-                return a
-    return 'change' if change else None
-
-
-def get_pattern(tokens):
-    t = ''.join(t.k for t in tokens)
-    if 'w' in t:
-        ps = ['a *w+ *h', 'a *h *w+', 'w+ *h *a', 'h *w+ *a', 'w *+a *h', 'h *a *w+']
-    else:
-        ps = ['a *h', 'h *a']
-
-    ns = [len(re.findall(p, t)) for p in ps]
-    k = t.count('a')
-    for n, p in zip(ns, ps):
-        if n == k:
-            return p
-    return ''
+            action = a
+    return 'change' if any(w.isdigit() for w in text) else action
 
 
 def get_words(text):
-    return re.sub(r':\d+', ' ', text).replace(MENTION, '\n').replace(',', '\n').replace('.', ' ').replace('\n', ' | ').split()
+    text = text.lower().replace('ё', 'е').replace(',', ' ').replace(MENTION, '\n')
+    text = re.sub(r':\d+', ' час', text)
+    text = re.sub(r'[^0-9а-яn\n]', ' ', text)
+    text = re.sub(r'(\d\d\d\d) (\d\d?) (\d\d?)', r'\1-\2-\3', text)
+    text = re.sub(r'(\d\d?) (\d\d?) (\d\d\d\d)', r'\3-\2-\1', text)
+    text = text.replace('полночь', '0 час')
+    text = text.replace('полдень', '12 час')
+    return text.replace('\n', ' | ').split()
 
 
-def get_changes(text):
+class A:
+    def __init__(self):
+        self.a = []
+        self.s = []
+        self.h = H()
+
+    def add(self, q):
+        if isinstance(q, str):
+            if self.h:
+                self.a.append(self.h)
+                self.h = H()
+
+            if self.a:
+                self.s.append(self.a)
+                self.a = []
+
+            if q in ('create', 'notify'):
+                self.s.append(q)
+        else:
+            self.h.add(q)
+
+    def get(self, v):
+        if self.h:
+            self.a.append(self.h)
+
+        if self.a:
+            self.s.append(self.a)
+
+        a = None
+        self.a = []
+
+        t = {k: [] for k in v}
+
+        while self.s:
+            s = self.s.pop()
+            if isinstance(s, str):
+                if self.a:
+                    t[s] += self.a
+                    a = None
+                    self.a = []
+                else:
+                    a = s
+            else:
+                if a:
+                    for h in s:
+                        t[a] += h.get()
+                else:
+                    for h in s:
+                        self.a += h.get()
+
+        return {} if self.a else t
+
+
+class H:
+    def __init__(self):
+        self.q = []
+        self.s = []
+        self.h = None
+
+    def __bool__(self):
+        return self.h is not None
+
+    def add(self, q):
+        h = 'hour' in q
+        if self.h is not None and self.h != h:
+            self.s.append(self.q)
+            self.q = [q]
+        else:
+            self.q.append(q)
+        self.h = h
+
+    def get(self):
+        while self.s:
+            s = self.s.pop()
+            if not self.q:
+                self.q = s
+                continue
+            for y in s:
+                for x in self.q:
+                    y.update(x)
+                    yield y
+            self.q = []
+        for q in self.q:
+            if 'hour' in q:
+                yield q
+
+
+def get_triggers(text):
     words = get_words(text)
     tokens = get_tokens(words)
 
     if not tokens:
-        return None
+        return {}
 
-    changes = []
-    for t in tokens:
-        if t.k == 'A':
-            changes.append(('not ' + t.v, None, None))
+    a = A()
+    k = ''.join(t.k for t in tokens)
+    v = {t.v for t in tokens if t.k in 'Aa'}
 
-    p = get_pattern(tokens)
-    if not p:
-        return None
-
-    while True:
-        t = ''.join(t.k for t in tokens)
-        m = re.search(p, t)
-        if not m:
-            return changes
+    for m in re.finditer('a|A|x|w|nmN?|d|nh?', k):
         i, j = m.span()
 
-        ws = []
-        a = ''
-        h = 0
-        for t in tokens[i: j]:
-            if t.k == 'h':
-                h = t.v
-                t.k = ' '
-            elif t.k == 'w':
-                t.k = ' '
-                ws.append(t.v)
-            elif t.k == 'a':
-                a = t.v
-        for w in ws or [None]:
-            changes.append((a, h, w))
+        if m[0] == 'a':
+            a.add(tokens[i].v)
+        elif m[0] in 'Ax':
+            a.add('')
+        elif m[0] in ('n', 'nh'):
+            hour = tokens[i].v
+            if hour >= 24:
+                return {}
+            a.add({'hour': hour})
+        elif m[0] == 'w':
+            a.add({'weekday': tokens[i].v})
+        elif m[0] == 'nmN':
+            a.add({
+                'day': tokens[i].v,
+                'month': tokens[i + 1].v,
+                'year': tokens[i + 2].v
+            })
+        elif m[0] == 'nm':
+            a.add({
+                'day': tokens[i].v,
+                'month': tokens[i + 1].v,
+            })
+        elif m[0] == 'd':
+            a.add({
+                'day': tokens[i].v[0],
+                'month': tokens[i].v[1],
+                'year': tokens[i].v[2]
+            })
+
+    return a.get(v)
 
 
 def get_tokens(words):
     tokens = []
     for i in range(len(words)):
-        t = get_hour(words, i) or get_action(words, i) or get_weekday(words, i) or get_void(words, i)
+        t = get_number(words, i) or get_action(words, i) or get_weekday(words, i) or get_month(words, i) or get_date(words, i) or get_void(words, i) or get_split(words, i)
         if t is None:
             tokens.append(Token(' '))
         elif t.k != 'v':
@@ -171,8 +287,13 @@ def get_tokens(words):
     return tokens
 
 
+def get_date(words, i):
+    m = re.fullmatch(r'(\d\d\d\d)-(\d\d?)-(\d\d?)', words[i])
+    return m and Token('d', (int(m[3]), int(m[2]), int(m[1])))
+
+
 def get_split(words, i):
-    return Token('|') if words[i] == '|' else None
+    return Token('x') if words[i] == '|' else None
 
 
 def get_void(words, i):
@@ -191,25 +312,30 @@ def get_action(words, i):
 
 def get_hour(words, i):
     w = words[i]
+    if w.startswith('час') and len(w) <= 4:
+        i += 1
+        if i < len(words) and words[i] in ('дня', 'вечера'):
+            return Token('h', 12)
+        return Token('h', 0)
+    return None
+
+
+def get_number(words, i):
+    w = words[i]
     if w.isdigit():
-        hour = int(w)
+        number = int(w)
         i += 1
-        if i < len(words) and words[i] == 'час':
-            words[i] = ''
     elif w in TENS:
-        hour = TENS[w]
+        number = TENS[w]
         i += 1
-        if i < len(words):
-            if words[i] in DIGITS:
-                hour += DIGITS[words[i]]
-                words[i] = ''
-    elif w in HOURS:
-        hour = HOURS[words[i]]
+        if i < len(words) and words[i] in DIGITS:
+            number += DIGITS[words[i]]
+            words[i] = ''
+    elif w in TEENS:
+        number = TENS[w]
     else:
         return None
-    if 0 <= hour < 24:
-        return Token('h', hour)
-    return None
+    return Token('N' if number > 31 else 'n', number)
 
 
 def get_weekday(words, i):
@@ -226,6 +352,16 @@ def get_weekday(words, i):
     return Token('w', weekday)
 
 
-def clear_text(text):
-    text = re.sub(r':\d+', ' ', text).lower().replace('ё', 'е')
-    return re.sub(r'[^а-я0-9]', ' ', text).strip()
+def get_month(words, i):
+    w = words[i]
+    if w in MONTH:
+        month = MONTH.index(w) + 1
+    else:
+        if w[-1] in MONTH_ENDS:
+            w = w[:-1]
+        if w in MONTHS:
+            month = MONTHS.index(w) + 1
+        else:
+            return None
+    return Token('m', month)
+

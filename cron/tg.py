@@ -33,7 +33,6 @@ def create_poll(chat_id, poll):
     })
     if not res.ok:
         print(f'err: {res.text}')
-        raise ConnectionError
+        return None
 
-    res = res.json().get('result')
-    return res['poll'], res['date']
+    return res.json().get('result')

@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 
 
-def next(trigger):
+def get_next(trigger):
     time_zone = timedelta(hours=trigger['time_zone'])
     now = datetime.now() + time_zone
     t = now.replace(hour=trigger['hour'], minute=0, second=0, microsecond=0)

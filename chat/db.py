@@ -7,7 +7,7 @@ from time import time
 
 import dotenv
 
-from utils import next, get_id
+from utils import get_next, get_id
 
 dotenv.load_dotenv()
 
@@ -46,14 +46,11 @@ def execute(yql):
     return pool.retry_operation_sync(wrapper)
 
 
-def to_bin(values):
-    return sum(1 << v for v in values)
-
-
 def add_vote(poll_id, user_id, username, votes):
     id = get_id(poll_id, user_id)
     if votes:
-        execute(f'INSERT INTO votes (id, poll_id, username, vote) VALUES ({id}, "{poll_id}", "{username}", {to_bin(votes)});')
+        vote = sum(1 << v for v in votes)
+        execute(f'INSERT INTO votes (id, poll_id, username, vote) VALUES ({id}, "{poll_id}", "{username}", {vote});')
     else:
         execute(f'DELETE FROM votes WHERE id={id};')
 
@@ -65,15 +62,6 @@ def load_crons(group_id):
         c['trigger'] = json.loads(c['trigger'])
         c['poll'] = json.loads(c['poll'])
 
-    return crons
-
-
-def read_crons(key):
-    now = int(time())
-    crons = execute(f'SELECT id, group_id, poll, trigger FROM crons WHERE {key}<={now} AND {key}>0;')
-    for c in crons:
-        c['trigger'] = json.loads(c['trigger'])
-        c['poll'] = json.loads(c['poll'])
     return crons
 
 
@@ -117,11 +105,6 @@ def get_users(cron_id):
     return {u.get('username') for u in res} - users
 
 
-def edit_trigger(cron, key):
-    t = min(next(t) for t in cron['trigger'][key])
-    execute(f"UPDATE crons SET {key}={t} WHERE id={cron['id']};")
-
-
 def get_group_id(poll_id):
     res = execute(f'SELECT group_id FROM polls WHERE id="{poll_id}";')
     return res and res[0].get('group_id')
@@ -145,11 +128,10 @@ def get_user(id):
 def create_user(id):
     res = execute(f'INSERT INTO users (id, shift) VALUES ({id}, 3) RETURNING id;')
     if res:
-        return 'отлично\\! рад вас видеть\\! чтобы создавать здесь опросы для вашей группы, добавьте меня в ту группу и свяжите меня с ней, отправив туда сообщение @PollTriggerBot'
+        return True
 
     update_user({'id': id})
-    return 'привет\\! я сейчас не привязан ни к какой группе, давайте привяжемся и начнем создавать опросы\\?'
-
+    return False
 
 def update_user(user):
     id = user['id']
@@ -159,7 +141,9 @@ def update_user(user):
     execute(f'UPDATE users SET cron_id={cron_id}, group_id={group_id} WHERE id={id};')
 
 
-def reset_user(id):
+def reset_user(user):
+    id = user['id']
+    user['group_id'] = user['cron_id'] = None
     execute(f'UPDATE users SET cron_id=NULL, group_id=NULL WHERE id={id};')
 
 
@@ -167,8 +151,8 @@ def change_cron(cron):
     id = cron['id']
     trigger = cron['trigger']
 
-    cron['create'] = create = min(next(t) for t in trigger['create']) if trigger['create'] else 0
-    cron['notify'] = notify = min(next(t) for t in trigger['notify']) if trigger['notify'] else 0
+    cron['create'] = create = min(get_next(t) for t in trigger['create']) if trigger['create'] else 0
+    cron['notify'] = notify = min(get_next(t) for t in trigger['notify']) if trigger['notify'] else 0
 
     execute(f"UPDATE crons SET create={create}, notify={notify}, trigger='{json.dumps(trigger)}' WHERE id={id};")
 
@@ -185,8 +169,8 @@ def create_cron(cron):
     poll = cron['poll']
     group_id = cron['group_id']
 
-    cron['create'] = create = min(next(t) for t in trigger['create']) if trigger['create'] else 0
-    cron['notify'] = notify = min(next(t) for t in trigger['notify']) if trigger['notify'] else 0
+    cron['create'] = create = min(get_next(t) for t in trigger['create']) if trigger['create'] else 0
+    cron['notify'] = notify = min(get_next(t) for t in trigger['notify']) if trigger['notify'] else 0
 
     values = f"({id}, {group_id}, '{json.dumps(poll, ensure_ascii=False)}', {create}, {notify}, '{json.dumps(trigger)}')"
     execute(f"INSERT INTO crons (id, group_id, poll, create, notify, trigger) VALUES {values};")
@@ -209,5 +193,4 @@ def stop_cron(cron):
 
 
 def delete_cron(id):
-    trigger = {'create': [], 'notify': []}
-    execute(f"UPDATE crons SET create=NULL, notify=NULL, trigger='{json.dumps(trigger)}' WHERE id={id};")
+    execute(f"DELETE FROM crons WHERE id={id};")

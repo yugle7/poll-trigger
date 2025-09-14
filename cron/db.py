@@ -7,7 +7,7 @@ from time import time
 
 import dotenv
 
-from utils import next
+from utils import get_next
 
 dotenv.load_dotenv()
 
@@ -74,6 +74,6 @@ def get_users(cron_id):
     return {u.get('username') for u in res} - users
 
 
-def edit_trigger(cron, key):
-    t = min(next(t) for t in cron['trigger'][key])
+def update_next(cron, key):
+    t = min(get_next(t) for t in cron['trigger'][key])
     execute(f"UPDATE crons SET {key}={t} WHERE id={cron['id']};")

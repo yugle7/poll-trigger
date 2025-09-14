@@ -3,10 +3,10 @@ import tg
 
 
 def create_poll(cron):
-    poll, created = tg.create_poll(cron['group_id'], cron['poll'])
-
-    db.add_poll(poll['id'], cron['group_id'], cron['id'], created)
-    db.edit_trigger(cron, 'create')
+    res = tg.create_poll(cron['group_id'], cron['poll'])
+    if res:
+        db.add_poll(res['poll']['id'], cron['group_id'], cron['id'], res['date'])
+        db.update_next(cron, 'create')
 
 
 def notify_poll(cron):
@@ -16,7 +16,7 @@ def notify_poll(cron):
         text = ', '.join('@' + u.decode() for u in users)
         tg.send_message(cron['group_id'], f'отмечайтесь в опросе {text}')
 
-    db.edit_trigger(cron, 'notify')
+    db.update_next(cron, 'notify')
 
 
 def handler(event=None, context=None):

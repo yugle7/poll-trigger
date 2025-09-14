@@ -59,7 +59,7 @@ def load_crons(group_id):
     crons = execute(f'SELECT * FROM crons WHERE group_id={group_id} and create>=0;')
 
     for c in crons:
-        c['trigger'] = json.loads(c['trigger'])
+        c['triggers'] = json.loads(c['triggers'])
         c['poll'] = json.loads(c['poll'])
 
     return crons
@@ -115,7 +115,7 @@ def get_cron(id):
     if not res:
         return None
     cron = res[0]
-    cron['trigger'] = json.loads(cron['trigger'])
+    cron['triggers'] = json.loads(cron['triggers'])
     cron['poll'] = json.loads(cron['poll'])
     return cron
 
@@ -149,7 +149,7 @@ def reset_user(user):
 
 def change_cron(cron):
     id = cron['id']
-    trigger = cron['trigger']
+    trigger = cron['triggers']
 
     cron['create'] = create = min(get_next(t) for t in trigger['create']) if trigger['create'] else 0
     cron['notify'] = notify = min(get_next(t) for t in trigger['notify']) if trigger['notify'] else 0
@@ -165,7 +165,7 @@ def edit_cron(cron):
 
 def create_cron(cron):
     id = cron['id']
-    trigger = cron['trigger']
+    trigger = cron['triggers']
     poll = cron['poll']
     group_id = cron['group_id']
 
@@ -178,7 +178,7 @@ def create_cron(cron):
 
 def resume_cron(cron):
     id = cron['id']
-    trigger = cron['trigger']
+    trigger = cron['triggers']
 
     cron['create'] = create = min(next(t) for t in trigger['create']) if trigger['create'] else 0
     cron['notify'] = notify = min(next(t) for t in trigger['notify']) if trigger['notify'] else 0

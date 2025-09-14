@@ -168,7 +168,7 @@ def poll_message(user, poll):
         'id': user['cron_id'],
         'poll': poll,
         'group_id': user['group_id'],
-        'trigger': {'create': [], 'notify': []}
+        'triggers': {'create': [], 'notify': []}
     }
     db.create_cron(cron)
 
@@ -190,7 +190,7 @@ def reply_to_poll(user, poll, text):
             'id': user['cron_id'],
             'poll': poll,
             'group_id': user['group_id'],
-            'trigger': {'create': [], 'notify': []}
+            'triggers': {'create': [], 'notify': []}
         }
         db.create_cron(cron)
 
@@ -219,7 +219,7 @@ def text_to_cron(user, cron, command, text):
     question = cron['poll']['question']
 
     if command == 'resume':
-        if not cron['trigger']['create']:
+        if not cron['triggers']['create']:
             return f'у опроса "{question}" еще не задано время создания, чтобы его возобновлять'
 
         if cron.get('create'):
@@ -257,7 +257,9 @@ def text_to_cron(user, cron, command, text):
             return f'не понял как опрос "{question}" нужно поменять'
 
         for k, t in triggers.items():
-            cron['trigger'][k] = t
+            for q in t:
+                q['time_zone'] = user['time_zone']
+            cron['triggers'][k] = t
 
         if 'create' not in cron:
             db.create_cron(cron)

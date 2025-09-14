@@ -20,7 +20,7 @@ def what(cron, user):
         month = MONTH[create.month - 1]
         answers.append(f'— создам {create.hour}:00 {create.day} {month}')
 
-    trigger = cron['trigger']
+    trigger = cron['triggers']
     if trigger['create']:
         answers.append(f'— создаю {when(trigger["create"])}')
     if trigger['notify']:

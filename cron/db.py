@@ -50,7 +50,7 @@ def read_crons(key):
     now = int(time())
     crons = execute(f'SELECT id, group_id, poll, trigger FROM crons WHERE {key}<={now} AND {key}>0;')
     for c in crons:
-        c['trigger'] = json.loads(c['trigger'])
+        c['triggers'] = json.loads(c['triggers'])
         c['poll'] = json.loads(c['poll'])
     return crons
 
@@ -75,5 +75,5 @@ def get_users(cron_id):
 
 
 def update_next(cron, key):
-    t = min(get_next(t) for t in cron['trigger'][key])
+    t = min(get_next(t) for t in cron['triggers'][key])
     execute(f"UPDATE crons SET {key}={t} WHERE id={cron['id']};")

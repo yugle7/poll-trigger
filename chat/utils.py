@@ -126,7 +126,7 @@ def get_command(text):
     return 'change' if any(w.isdigit() for w in text) else action
 
 
-def get_words(text):
+def get_text(text):
     text = text.lower().replace('ё', 'е').replace(',', ' ').replace(MENTION, '\n')
     text = re.sub(r':\d+', ' час', text)
     text = re.sub(r'[^0-9а-яn\n]', ' ', text)
@@ -134,7 +134,7 @@ def get_words(text):
     text = re.sub(r'(\d\d?) (\d\d?) (\d\d\d\d)', r'\3-\2-\1', text)
     text = text.replace('полночь', '0 час')
     text = text.replace('полдень', '12 час')
-    return text.replace('\n', ' | ').split()
+    return text.replace('\n', ' | ')
 
 
 class A:
@@ -225,7 +225,7 @@ class H:
 
 
 def get_triggers(text):
-    words = get_words(text)
+    words = text.split()
     tokens = get_tokens(words)
 
     if not tokens:
@@ -364,4 +364,3 @@ def get_month(words, i):
         else:
             return None
     return Token('m', month)
-

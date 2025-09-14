@@ -3,7 +3,7 @@ import json
 import tg
 import db
 
-from utils import get_id, what, get_command, get_triggers
+from utils import get_id, what, get_command, get_triggers, get_text
 
 
 def handler(event, context=None):
@@ -104,7 +104,7 @@ def handle(body):
                     if not text:
                         return 'нет текста'
 
-                    text = clear_text(text)
+                    text = get_text(text)
 
                     reply = message.get('reply_to_message')
                     if reply:

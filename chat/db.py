@@ -149,12 +149,12 @@ def reset_user(user):
 
 def change_cron(cron):
     id = cron['id']
-    trigger = cron['triggers']
+    triggers = cron['triggers']
 
-    cron['create'] = create = min(get_next(t) for t in trigger['create']) if trigger['create'] else 0
-    cron['notify'] = notify = min(get_next(t) for t in trigger['notify']) if trigger['notify'] else 0
+    cron['create'] = create = min(get_next(t) for t in triggers['create']) if triggers['create'] else 0
+    cron['notify'] = notify = min(get_next(t) for t in triggers['notify']) if triggers['notify'] else 0
 
-    execute(f"UPDATE crons SET create={create}, notify={notify}, trigger='{json.dumps(trigger)}' WHERE id={id};")
+    execute(f"UPDATE crons SET create={create}, notify={notify}, triggers='{json.dumps(triggers)}' WHERE id={id};")
 
 
 def edit_cron(cron):
@@ -165,15 +165,15 @@ def edit_cron(cron):
 
 def create_cron(cron):
     id = cron['id']
-    trigger = cron['triggers']
+    triggers = cron['triggers']
     poll = cron['poll']
     group_id = cron['group_id']
 
-    cron['create'] = create = min(get_next(t) for t in trigger['create']) if trigger['create'] else 0
-    cron['notify'] = notify = min(get_next(t) for t in trigger['notify']) if trigger['notify'] else 0
+    cron['create'] = create = min(get_next(t) for t in triggers['create']) if triggers['create'] else 0
+    cron['notify'] = notify = min(get_next(t) for t in triggers['notify']) if triggers['notify'] else 0
 
-    values = f"({id}, {group_id}, '{json.dumps(poll, ensure_ascii=False)}', {create}, {notify}, '{json.dumps(trigger)}')"
-    execute(f"INSERT INTO crons (id, group_id, poll, create, notify, trigger) VALUES {values};")
+    values = f"({id}, {group_id}, '{json.dumps(poll, ensure_ascii=False)}', {create}, {notify}, '{json.dumps(triggers)}')"
+    execute(f"INSERT INTO crons (id, group_id, poll, create, notify, triggers) VALUES {values};")
 
 
 def resume_cron(cron):

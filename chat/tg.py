@@ -2,6 +2,7 @@ import json
 import os
 
 import requests
+import re
 
 import dotenv
 
@@ -11,9 +12,13 @@ TG_BOT_TOKEN = os.getenv('TG_BOT_TOKEN')
 URL = 'https://api.telegram.org'
 
 
+def escape(text):
+    return re.sub(r'([:_~*\[\]()>#+-={}|.!])', r'\\\1', text)
+
+
 def send_message(chat_id, text):
     url = f'{URL}/bot{TG_BOT_TOKEN}/sendMessage'
-    data = {'chat_id': chat_id, 'text': text, 'parse_mode': 'MarkdownV2'}
+    data = {'chat_id': chat_id, 'text': escape(text), 'parse_mode': 'MarkdownV2'}
 
     res = requests.post(url, json=data)
     if not res.ok:
@@ -24,7 +29,7 @@ def send_message(chat_id, text):
 
 def edit_message(chat_id, message_id, text):
     url = f'{URL}/bot{TG_BOT_TOKEN}/editMessageText'
-    data = {'chat_id': chat_id, 'text': text, 'message_id': message_id, 'parse_mode': 'MarkdownV2'}
+    data = {'chat_id': chat_id, 'text': escape(text), 'message_id': message_id, 'parse_mode': 'MarkdownV2'}
     res = requests.post(url, data=data)
     return res.ok or 'are exactly the same' in res.json().get('description', '')
 

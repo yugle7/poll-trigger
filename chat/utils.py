@@ -55,11 +55,8 @@ def when(triggers, user):
             if y:
                 answer += f'в {y} году'
 
-        answer = f'{answer} {hour:02}:00'
-        if t['time_zone'] != user['time_zone']:
-            answer += f' UTC+{int(t['time_zone'])}'
-
-        answers.append(answer)
+        hour += int(user['time_zone'] - t['time_zone'])
+        answers.append(f'{answer} {hour:02}:00')
 
     return ', '.join(answers)
 

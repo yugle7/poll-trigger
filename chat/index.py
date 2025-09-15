@@ -147,10 +147,10 @@ def mention_in_text(user_id, group_id):
 def set_time_zone(user, text):
     h, m = map(int, text.split(':'))
     if not (0 <= h < 24 and 0 <= m < 60):
-        return 'Я не смог понять какое время, ожидаю формат 12:34'
+        return 'Я не смог понять какое у вас время, ожидаю формат 12:34'
 
     now = datetime.now()
-    time_zone = (h + m / 60 - now.hour + now.minute / 60) % 24
+    time_zone = (24 + h + m / 60 - now.hour - now.minute / 60) % 24
     user['time_zone'] = int(time_zone + 0.5)
     db.update_user(user)
 

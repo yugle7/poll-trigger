@@ -32,31 +32,36 @@ def what(cron, user):
 def when(triggers, user):
     answers = []
     for t in triggers:
-        hour = t['hour']
+        hour = t['hour'] + int(user['time_zone'] - t['time_zone'])
 
         y = t.get('year')
         m = t.get('month')
         d = t.get('day')
+        w = t.get('weekday')
 
-        if 'weekday' in t:
-            answer = WEEKDAY[t['weekday']]
+        time_zone = timedelta(hours=user['time_zone'])
+        n = datetime.fromtimestamp(get_next(t)) + time_zone
+
+        if w is not None:
+            answer = WEEKDAY[n.weekday()]
+
         elif y and m and d:
-            answer = f'{d} {MONTH[m - 1]} {y}'
+            answer = f'{n.day} {MONTH[n.month - 1]} {n.year}'
         else:
             if d:
                 if m:
-                    answer = f'ежегодно {d} {MONTH[m - 1]}'
+                    answer = f'ежегодно {n.day} {MONTH[n.month - 1]}'
                 else:
-                    answer = f'ежемесячно {d} числа'
+                    answer = f'ежемесячно {n.day} числа'
             elif m:
                 answer = f'ежедневно весь {MONTH[m - 1]}'
             else:
                 answer = f'каждый день'
+
             if y:
                 answer += f'в {y} году'
 
-        hour += int(user['time_zone'] - t['time_zone'])
-        answers.append(f'{answer} {hour:02}:00')
+        answers.append(f'{answer} {n.hour:02}:00')
 
     return ', '.join(answers)
 

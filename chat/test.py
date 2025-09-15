@@ -1,12 +1,15 @@
 from index import handler
 from utils import get_triggers
 
-if __name__ == '__main__':
-    # handler({'body': open('body.json').read()})
 
+def test_get_triggers():
     print(
         get_triggers('''
-        создавай 19 пт напоминай 8 сб
-        создавай 20 напоминай 10
-        ''')
+            создавай 19 пт напоминай 8 сб
+            создавай 20 напоминай 10
+            ''')
     )
+
+
+if __name__ == '__main__':
+    handler({'body': open('body.json').read()})

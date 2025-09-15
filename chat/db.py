@@ -3,7 +3,6 @@ import ydb.iam
 
 import os
 import json
-from time import time
 
 import dotenv
 
@@ -18,14 +17,14 @@ driver = ydb.Driver(
     # credentials=ydb.iam.MetadataUrlCredentials()
 )
 
-driver.wait(fail_fast=True, timeout=5)
+driver.wait(fail_fast=True, timeout=10)
 
 pool = ydb.SessionPool(driver)
 
 settings = ydb \
     .BaseRequestSettings() \
-    .with_timeout(3) \
-    .with_operation_timeout(2)
+    .with_timeout(10) \
+    .with_operation_timeout(8)
 
 
 def execute(yql):

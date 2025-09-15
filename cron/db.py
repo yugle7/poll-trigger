@@ -48,7 +48,7 @@ def execute(yql):
 
 def read_crons(key):
     now = int(time())
-    crons = execute(f'SELECT id, group_id, poll, trigger FROM crons WHERE {key}<={now} AND {key}>0;')
+    crons = execute(f'SELECT id, group_id, poll, triggers FROM crons WHERE {key}<={now} AND {key}>0;')
     for c in crons:
         c['triggers'] = json.loads(c['triggers'])
         c['poll'] = json.loads(c['poll'])

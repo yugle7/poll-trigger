@@ -18,14 +18,14 @@ driver = ydb.Driver(
     # credentials=ydb.iam.MetadataUrlCredentials()
 )
 
-driver.wait(fail_fast=True, timeout=5)
+driver.wait(fail_fast=True, timeout=50)
 
 pool = ydb.SessionPool(driver)
 
 settings = ydb \
     .BaseRequestSettings() \
-    .with_timeout(3) \
-    .with_operation_timeout(2)
+    .with_timeout(30) \
+    .with_operation_timeout(20)
 
 
 def execute(yql):

@@ -1,9 +1,11 @@
 import json
+import re
 
 import tg
 import db
 
 from utils import get_id, what, get_command, get_triggers, get_text
+from datetime import datetime
 
 
 def handler(event, context=None):
@@ -70,9 +72,10 @@ def handle(body):
     user_id = message['from']['id']
     chat_id = message['chat']['id']
 
+    text = message.get('text')
+
     try:
         if chat_id != user_id:
-            text = message.get('text')
             if not text or '@' not in text:
                 return 'не ко мне'
 
@@ -82,11 +85,15 @@ def handle(body):
 
             answer = mention_in_text(user_id, chat_id)
 
-        elif message.get('text') == '/start':
+        elif text == '/start':
             if db.create_user(user_id):
                 answer = 'Отлично! Рад вас видеть!\n\nЧтобы создавать здесь опросы для вашей группы, добавьте меня в ту группу и свяжите меня с ней, отправив туда команду /start.\n\nПо умолчанию время московское. Если захотите изменить его, то отправьте мне сколько сейчас времени у вас в формате 12:34'
             else:
                 answer = 'Привет! Я сейчас не привязан ни к какой группе, давайте привяжемся и начнем создавать опросы?'
+
+        elif re.fullmatch('\d+:\d+', text):
+            user = db.get_user(user_id)
+            answer = set_time_zone(user, text)
 
         else:
             user = db.get_user(user_id)
@@ -135,6 +142,19 @@ def mention_in_text(user_id, group_id):
 
     db.update_user({'id': user_id, 'group_id': group_id})
     return f'Теперь вы можете здесь создавать опросы и задавать время, когда их создавать в группе "{title}" и когда напоминать в них отмечаться'
+
+
+def set_time_zone(user, text):
+    h, m = map(int, text.split(':'))
+    if not (0 <= h < 24 and 0 <= m < 60):
+        return 'Я не смог понять какое время, ожидаю формат 12:34'
+
+    now = datetime.now()
+    time_zone = (h + m / 60 - now.hour + now.minute / 60) % 24
+    user['time_zone'] = int(time_zone + 0.5)
+    db.update_user(user)
+
+    return f'Установлен часовой пояс UTC+{user["time_zone"]}'
 
 
 def get_group_id(user, poll=None):

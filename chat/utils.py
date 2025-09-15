@@ -12,7 +12,7 @@ def get_id(a, b):
 def what(cron, user):
     question = cron['poll']['question']
     stopped = not cron['create']
-    answers = [f'"{question}" {"остановлен" if stopped else "запущен"}']
+    answers = [f'"{question}" {"остановлен" if stopped else "создаётся"}']
 
     if cron['create']:
         time_zone = timedelta(hours=user['time_zone'])
@@ -22,14 +22,14 @@ def what(cron, user):
 
     triggers = cron['triggers']
     if triggers['create']:
-        answers.append(f'— создаю {when(triggers["create"])}')
+        answers.append(f'— создаю {when(triggers["create"], user)}')
     if triggers['notify']:
-        answers.append(f'— напоминаю {when(triggers["notify"])}')
+        answers.append(f'— напоминаю {when(triggers["notify"], user)}')
 
     return '\n'.join(answers)
 
 
-def when(triggers):
+def when(triggers, user):
     answers = []
     for t in triggers:
         hour = t['hour']
@@ -54,7 +54,13 @@ def when(triggers):
                 answer = f'каждый день'
             if y:
                 answer += f'в {y} году'
-        answers.append(f'{answer} {hour:02}:00')
+
+        answer = f'{answer} {hour:02}:00'
+        if t['time_zone'] != user['time_zone']:
+            answer += f' UTC+{int(t['time_zone'])}'
+
+        answers.append(answer)
+
     return ', '.join(answers)
 
 

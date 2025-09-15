@@ -1,4 +1,4 @@
-import ydb
+# import ydb
 import ydb.iam
 
 import os
@@ -132,12 +132,15 @@ def create_user(id):
     update_user({'id': id})
     return False
 
+
 def update_user(user):
     id = user['id']
+
     cron_id = user.get('cron_id') or 'NULL'
     group_id = user.get('group_id') or 'NULL'
+    time_zone = user['time_zone']
 
-    execute(f'UPDATE users SET cron_id={cron_id}, group_id={group_id} WHERE id={id};')
+    execute(f'UPDATE users SET cron_id={cron_id}, group_id={group_id}, time_zone={time_zone} WHERE id={id};')
 
 
 def reset_user(user):

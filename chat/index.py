@@ -45,7 +45,7 @@ def notify_poll(cron):
     users = db.get_users(cron['id'])
     if users:
         text = ', '.join('@' + u.decode() for u in users)
-        tg.send_message(cron['group_id'], f'отмечайтесь в опросе {text}')
+        tg.send_message(cron['group_id'], f'Отмечайтесь в опросе {text}')
 
 
 def handle(body):
@@ -77,14 +77,14 @@ def handle(body):
                 return 'не ко мне'
 
             if not db.get_user(user_id):
-                tg.send_message(chat_id, 'сначала заведите личную переписку со мной')
+                tg.send_message(chat_id, 'Сначала заведите личную переписку со мной')
                 return 'не узнал'
 
             answer = mention_in_text(user_id, chat_id)
 
         elif message.get('text') == '/start':
             if db.create_user(user_id):
-                answer = 'Отлично! Рад вас видеть!\n\nЧтобы создавать здесь опросы для вашей группы, добавьте меня в ту группу и свяжите меня с ней, отправив туда сообщение @PollTriggerBot.\n\nПо умолчанию время московское. Если захотите изменить его, то отправьте мне сколько сейчас времени у вас в формате 12:34'
+                answer = 'Отлично! Рад вас видеть!\n\nЧтобы создавать здесь опросы для вашей группы, добавьте меня в ту группу и свяжите меня с ней, отправив туда команду /start.\n\nПо умолчанию время московское. Если захотите изменить его, то отправьте мне сколько сейчас времени у вас в формате 12:34'
             else:
                 answer = 'Привет! Я сейчас не привязан ни к какой группе, давайте привяжемся и начнем создавать опросы?'
 
@@ -131,10 +131,10 @@ def mention_in_text(user_id, group_id):
     title = tg.get_chat(group_id)['title']
 
     if not tg.is_admin(user_id, group_id):
-        return f'у вас не хватает прав, чтобы создавать опросы в группе "{title}", станьте сначала в ней администратором'
+        return f'У вас не хватает прав, чтобы создавать опросы в группе "{title}", станьте сначала в ней администратором'
 
     db.update_user({'id': user_id, 'group_id': group_id})
-    return f'теперь вы можете здесь создавать опросы и задавать время, когда их создавать в группе "{title}" и когда напоминать в них отмечаться'
+    return f'Теперь вы можете здесь создавать опросы и задавать время, когда их создавать в группе "{title}" и когда напоминать в них отмечаться'
 
 
 def get_group_id(user, poll=None):
@@ -204,12 +204,12 @@ def text_message(user, text):
         crons = db.load_crons(user['group_id'])
         if not crons:
             title = tg.get_chat(user['group_id'])['title']
-            return f'в группе "{title}" еще нет управляемых мной опросов'
+            return f'В группе "{title}" еще нет управляемых мной опросов'
 
         return '\n\n'.join(what(c, user) for c in crons)
 
     if not user['cron_id']:
-        return 'с каким опросом это сделать?'
+        return 'С каким опросом это сделать?'
 
     cron = db.get_cron(user['cron_id'])
     return text_to_cron(user, cron, command, text)
@@ -220,30 +220,30 @@ def text_to_cron(user, cron, command, text):
 
     if command == 'resume':
         if not cron['triggers']['create']:
-            return f'у опроса "{question}" еще не задано время создания, чтобы его возобновлять'
+            return f'У опроса "{question}" еще не задано время создания, чтобы его возобновлять'
 
         if cron.get('create'):
-            return f'опрос "{question}" уже и так создавался'
+            return f'Опрос "{question}" уже и так создавался'
 
         db.resume_cron(cron)
         return what(cron, user['shift'])
 
     if command == 'stop':
         if not cron.get('create'):
-            return f'опрос "{question}" и так не создавался'
+            return f'Опрос "{question}" и так не создавался'
 
         db.stop_cron(cron)
         return what(cron, user['shift'])
 
     if command == 'delete':
         if cron.get('create') is None:
-            return f'опрос "{question}" и так был удален'
+            return f'Опрос "{question}" и так был удален'
 
         user['cron_id'] = None
         db.update_user(user)
 
         db.delete_cron(cron['id'])
-        return f'опрос "{question}" удален'
+        return f'Опрос "{question}" удален'
 
     if command == 'create':
         return create_poll(cron)
@@ -254,7 +254,7 @@ def text_to_cron(user, cron, command, text):
     if command == 'change':
         triggers = get_triggers(text)
         if not triggers:
-            return f'не понял как опрос "{question}" нужно поменять'
+            return f'Не понял как опрос "{question}" нужно поменять'
 
         for k, t in triggers.items():
             for q in t:
@@ -271,4 +271,4 @@ def text_to_cron(user, cron, command, text):
     if command == 'show':
         return what(cron, user)
 
-    return f'что мне сделать с опросом "{question}"?'
+    return f'Что мне сделать с опросом "{question}"?'

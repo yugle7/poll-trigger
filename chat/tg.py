@@ -9,6 +9,7 @@ import dotenv
 dotenv.load_dotenv()
 
 TG_BOT_TOKEN = os.getenv('TG_BOT_TOKEN')
+API_GATEWAY_DOMAIN = os.getenv('API_GATEWAY_DOMAIN')
 URL = 'https://api.telegram.org'
 
 
@@ -76,3 +77,14 @@ def get_chat(id):
         print(f'err: {res.text}')
         return None
     return res.json()['result']
+
+
+def set_webhook():
+    url = f'{URL}/bot{TG_BOT_TOKEN}/setWebhook'
+    res = requests.post(url, json={'url': f'{API_GATEWAY_DOMAIN}/fshtb-function'})
+    print(res.json())
+
+
+def delete_webhook():
+    url = f'{URL}/bot{TG_BOT_TOKEN}/deleteWebhook'
+    requests.post(url)

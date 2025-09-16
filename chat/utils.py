@@ -18,7 +18,7 @@ def to_answer(cron, user):
         time_zone = timedelta(hours=user['time_zone'])
         create = datetime.fromtimestamp(cron['create']) + time_zone
         month = MONTH[create.month - 1]
-        answers.append(f'— создам {create.hour}:00 {create.day} {month}')
+        answers.append(f'— создам {create.day} {month} {create.hour}:00')
 
     triggers = cron['triggers']
     if triggers['create']:

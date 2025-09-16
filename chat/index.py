@@ -91,7 +91,7 @@ def handle(body):
             else:
                 answer = 'Привет! Я сейчас не привязан ни к какой группе, давайте привяжемся и начнем создавать опросы?'
 
-        elif text and re.fullmatch('\d+:\d+', text):
+        elif text and re.fullmatch(r'\d+:\d+', text):
             answer = set_time_zone(user_id, text)
 
         else:
@@ -273,10 +273,10 @@ def text_to_cron(user, cron, command, text):
         if not triggers:
             return f'Не понял как опрос "{question}" нужно поменять'
 
-        for k, t in triggers.items():
-            for q in t:
-                q['time_zone'] = user['time_zone']
-            cron['triggers'][k] = t
+        for key, triggers in triggers.items():
+            for t in triggers:
+                t['time_zone'] = user['time_zone']
+            cron['triggers'][key] = triggers
 
         if 'create' not in cron:
             db.create_cron(cron)

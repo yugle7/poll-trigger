@@ -125,25 +125,30 @@ def get_user(id):
 
 
 def create_user(id):
-    res = execute(f'INSERT INTO users (id, shift) VALUES ({id}, 3) RETURNING id;')
+    res = execute(f'INSERT INTO users (id, time_zone) VALUES ({id}, 3) RETURNING id;')
     if res:
         return True
 
-    update_user({'id': id})
+    reset_group_id({'id': id})
     return False
 
 
-def update_user(user):
+def set_time_zone(user_id, time_zone):
+    execute(f'UPDATE users SET time_zone={time_zone} WHERE id={user_id};')
+
+
+def set_cron_id(user):
     id = user['id']
-
-    cron_id = user.get('cron_id') or 'NULL'
-    group_id = user.get('group_id') or 'NULL'
-    time_zone = user['time_zone']
-
-    execute(f'UPDATE users SET cron_id={cron_id}, group_id={group_id}, time_zone={time_zone} WHERE id={id};')
+    group_id = user['group_id'] or 'NULL'
+    cron_id = user['cron_id'] or 'NULL'
+    execute(f'UPDATE users SET cron_id={cron_id}, group_id={group_id} WHERE id={id};')
 
 
-def reset_user(user):
+def set_group_id(user_id, group_id):
+    execute(f'UPDATE users SET cron_id=NULL, group_id={group_id} WHERE id={user_id};')
+
+
+def reset_group_id(user):
     id = user['id']
     user['group_id'] = user['cron_id'] = None
     execute(f'UPDATE users SET cron_id=NULL, group_id=NULL WHERE id={id};')

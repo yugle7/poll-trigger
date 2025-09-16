@@ -4,7 +4,7 @@ import re
 import tg
 import db
 
-from utils import get_id, what, get_command, get_triggers, get_text
+from utils import get_id, to_answer, get_command, get_triggers, get_text
 from datetime import datetime
 
 
@@ -91,14 +91,13 @@ def handle(body):
             else:
                 answer = 'Привет! Я сейчас не привязан ни к какой группе, давайте привяжемся и начнем создавать опросы?'
 
-        elif re.fullmatch('\d+:\d+', text):
-            user = db.get_user(user_id)
-            answer = set_time_zone(user, text)
+        elif text and re.fullmatch('\d+:\d+', text):
+            answer = set_time_zone(user_id, text)
 
         else:
-            user = db.get_user(user_id)
-
             poll = message.get('poll')
+
+            user = db.get_user(user_id)
             get_group_id(user, forwarded and poll)
 
             if not user['group_id']:
@@ -106,11 +105,9 @@ def handle(body):
             else:
                 if poll:
                     answer = poll_message(user, poll)
+                elif not text:
+                    return 'нет текста'
                 else:
-                    text = message.get('text')
-                    if not text:
-                        return 'нет текста'
-
                     text = get_text(text)
 
                     reply = message.get('reply_to_message')
@@ -140,21 +137,21 @@ def mention_in_text(user_id, group_id):
     if not tg.is_admin(user_id, group_id):
         return f'У вас не хватает прав, чтобы создавать опросы в группе "{title}", станьте сначала в ней администратором'
 
-    db.update_user({'id': user_id, 'group_id': group_id})
+    db.set_group_id(user_id, group_id)
     return f'Теперь вы можете здесь создавать опросы и задавать время, когда их создавать в группе "{title}" и когда напоминать в них отмечаться'
 
 
-def set_time_zone(user, text):
+def set_time_zone(user_id, text):
     h, m = map(int, text.split(':'))
     if not (0 <= h < 24 and 0 <= m < 60):
         return 'Я не смог понять какое у вас время, ожидаю формат 12:34'
 
     now = datetime.now()
     time_zone = (24 + h + m / 60 - now.hour - now.minute / 60) % 24
-    user['time_zone'] = int(time_zone + 0.5)
-    db.update_user(user)
+    time_zone = int(time_zone + 0.5)
+    db.set_time_zone(user_id, time_zone)
 
-    return f'Установлен часовой пояс UTC+{user["time_zone"]}'
+    return f'Установлен часовой пояс UTC+{time_zone}'
 
 
 def get_group_id(user, poll=None):
@@ -166,7 +163,7 @@ def get_group_id(user, poll=None):
                 return
 
     if user['group_id'] and not tg.is_admin(user['id'], user['group_id']):
-        db.reset_user(user)
+        db.reset_group_id(user)
         return
 
 
@@ -175,14 +172,14 @@ def poll_message(user, poll):
     poll = {k: poll[k] for k in ['question', 'options', 'is_anonymous', 'allows_multiple_answers']}
 
     user['cron_id'] = get_id(user['group_id'], poll['question'])
-    db.update_user(user)
+    db.set_cron_id(user)
 
     cron = db.get_cron(user['cron_id'])
     if cron:
         cron['poll'] = poll
 
         db.edit_cron(cron)
-        return what(cron, user)
+        return to_answer(cron, user)
 
     cron = {
         'id': user['cron_id'],
@@ -198,7 +195,7 @@ def poll_message(user, poll):
 
 def reply_to_poll(user, poll, text):
     user['cron_id'] = get_id(user['group_id'], poll['question'])
-    db.update_user(user)
+    db.set_cron_id(user)
 
     cron = db.get_cron(user['cron_id'])
     if cron:
@@ -226,7 +223,7 @@ def text_message(user, text):
             title = tg.get_chat(user['group_id'])['title']
             return f'В группе "{title}" еще нет управляемых мной опросов'
 
-        return '\n\n'.join(what(c, user) for c in crons)
+        return '\n\n'.join(to_answer(c, user) for c in crons)
 
     if not user['cron_id']:
         return 'С каким опросом это сделать?'
@@ -246,21 +243,21 @@ def text_to_cron(user, cron, command, text):
             return f'Опрос "{question}" уже и так создавался'
 
         db.resume_cron(cron)
-        return what(cron, user['shift'])
+        return to_answer(cron, user)
 
     if command == 'stop':
         if not cron.get('create'):
             return f'Опрос "{question}" и так не создавался'
 
         db.stop_cron(cron)
-        return what(cron, user['shift'])
+        return to_answer(cron, user)
 
     if command == 'delete':
         if cron.get('create') is None:
             return f'Опрос "{question}" и так был удален'
 
         user['cron_id'] = None
-        db.update_user(user)
+        db.set_cron_id(user)
 
         db.delete_cron(cron['id'])
         return f'Опрос "{question}" удален'
@@ -286,9 +283,9 @@ def text_to_cron(user, cron, command, text):
         else:
             db.change_cron(cron)
 
-        return what(cron, user)
+        return to_answer(cron, user)
 
     if command == 'show':
-        return what(cron, user)
+        return to_answer(cron, user)
 
     return f'Что мне сделать с опросом "{question}"?'

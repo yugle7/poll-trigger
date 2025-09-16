@@ -9,10 +9,10 @@ def get_id(a, b):
     return CityHash64(str(a) + ' ' + str(b).lower().strip())
 
 
-def what(cron, user):
+def to_answer(cron, user):
     question = cron['poll']['question']
     stopped = not cron['create']
-    answers = [f'"{question}" {"остановлен" if stopped else "создаётся"}']
+    answers = [f'"{question}" {"не создаётся" if stopped else "создаётся"}']
 
     if cron['create']:
         time_zone = timedelta(hours=user['time_zone'])
@@ -32,8 +32,6 @@ def what(cron, user):
 def when(triggers, user):
     answers = []
     for t in triggers:
-        hour = t['hour'] + int(user['time_zone'] - t['time_zone'])
-
         y = t.get('year')
         m = t.get('month')
         d = t.get('day')

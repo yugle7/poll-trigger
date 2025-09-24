@@ -22,32 +22,32 @@ def handler(event, context=None):
     return {'statusCode': 200, 'body': answer}
 
 
-def send_answer(text, chat_id, message_id, edited):
+def send_answer(text, user_id, message_id, edited):
     print(text)
 
-    answer_id = edited and db.get_answer_id(chat_id, message_id)
+    answer_id = edited and db.get_answer_id(user_id, message_id)
 
     if answer_id:
-        if not tg.edit_message(chat_id, answer_id, text):
-            tg.delete_message(chat_id, answer_id)
-            answer_id = tg.send_message(chat_id, text)
-            db.edit_answer_id(chat_id, message_id, answer_id)
+        if not tg.edit_message(user_id, answer_id, text):
+            tg.delete_message(user_id, answer_id)
+            answer_id = tg.send_message(user_id, text)
+            db.edit_answer_id(user_id, message_id, answer_id)
     else:
-        answer_id = tg.send_message(chat_id, text)
-        db.save_answer_id(chat_id, message_id, answer_id)
+        answer_id = tg.send_message(user_id, text)
+        db.save_answer_id(user_id, message_id, answer_id)
 
 
 def create_poll(cron):
-    res = tg.create_poll(cron['group_id'], cron['poll'])
+    res = tg.create_poll(cron['group_id'], cron['thread_id'], cron['poll'])
     if res:
-        db.add_poll(res['poll']['id'], cron['group_id'], cron['id'], res['date'])
+        db.add_poll(res['poll']['id'], cron['group_id'], cron['thread_id'], cron['id'], res['date'])
 
 
 def notify_poll(cron):
     users = db.get_users(cron['id'])
     if users:
         text = ', '.join('@' + u.decode() for u in users)
-        tg.send_message(cron['group_id'], f'Отмечайтесь в опросе {text}')
+        tg.show_message(cron['group_id'], cron['thread_id'], f'Отмечайтесь в опросе {text}')
 
 
 def handle(body):
@@ -79,17 +79,19 @@ def handle(body):
             if not text or '@' not in text:
                 return 'не ко мне'
 
+            thread_id = message.get('message_thread_id')
+
             if not db.get_user(user_id):
-                tg.send_message(chat_id, 'Сначала заведите личную переписку со мной')
+                tg.show_message(chat_id, thread_id, 'Сначала заведите личную переписку со мной')
                 return 'не узнал'
 
-            answer = mention_in_text(user_id, chat_id)
+            answer = mention_in_text(user_id, chat_id, thread_id)
 
         elif text == '/start':
             if db.create_user(user_id):
                 answer = 'Отлично! Рад вас видеть!\n\nЧтобы создавать здесь опросы для вашей группы, добавьте меня в ту группу и свяжите меня с ней, отправив туда команду /start.\n\nПо умолчанию время московское. Если захотите изменить его, то отправьте мне сколько сейчас времени у вас в формате 12:34'
             else:
-                answer = 'Привет! Я сейчас не привязан ни к какой группе, давайте привяжемся и начнем создавать опросы?'
+                answer = 'Привет! Я сейчас не привязан ни к какой группе, отправьте команду /start в той группе, где вы собираетесь создавать опросы?'
 
         elif text and re.fullmatch(r'\d+:\d+', text):
             answer = set_time_zone(user_id, text)
@@ -98,7 +100,7 @@ def handle(body):
             poll = message.get('poll')
 
             user = db.get_user(user_id)
-            get_group_id(user, forwarded and poll)
+            get_where(user, forwarded and poll)
 
             if not user['group_id']:
                 answer = 'Сначала свяжите меня с какой-нибудь группой'
@@ -131,13 +133,13 @@ def handle(body):
     return answer
 
 
-def mention_in_text(user_id, group_id):
+def mention_in_text(user_id, group_id, thread_id):
     title = tg.get_chat(group_id)['title']
 
     if not tg.is_admin(user_id, group_id):
         return f'У вас не хватает прав, чтобы создавать опросы в группе "{title}", станьте сначала в ней администратором'
 
-    db.set_group_id(user_id, group_id)
+    db.set_where(user_id, group_id, thread_id)
     return f'Теперь вы можете здесь создавать опросы и задавать время, когда их создавать в группе "{title}" и когда напоминать в них отмечаться'
 
 
@@ -154,16 +156,17 @@ def set_time_zone(user_id, text):
     return f'Установлен часовой пояс UTC+{time_zone}'
 
 
-def get_group_id(user, poll=None):
+def get_where(user, poll=None):
     if poll:
-        group_id = db.get_group_id(poll['id'])
-        if group_id:
-            if tg.is_admin(user['id'], group_id):
-                user['group_id'] = group_id
+        where = db.get_where(poll['id'])
+        if where:
+            if tg.is_admin(user['id'], where['group_id']):
+                user['group_id'] = where['group_id']
+                user['thread_id'] = where['thread_id']
                 return
 
     if user['group_id'] and not tg.is_admin(user['id'], user['group_id']):
-        db.reset_group_id(user)
+        db.reset_where(user)
         return
 
 
@@ -171,7 +174,8 @@ def poll_message(user, poll):
     poll['options'] = [q['text'].strip() for q in poll['options']]
     poll = {k: poll[k] for k in ['question', 'options', 'is_anonymous', 'allows_multiple_answers']}
 
-    user['cron_id'] = get_id(user['group_id'], poll['question'])
+    where_id = get_id(user['group_id'], user['thread_id'])
+    user['cron_id'] = get_id(where_id, poll['question'])
     db.set_cron_id(user)
 
     cron = db.get_cron(user['cron_id'])
@@ -185,6 +189,7 @@ def poll_message(user, poll):
         'id': user['cron_id'],
         'poll': poll,
         'group_id': user['group_id'],
+        'thread_id': user['thread_id'],
         'triggers': {'create': [], 'notify': []}
     }
     db.create_cron(cron)
@@ -194,7 +199,8 @@ def poll_message(user, poll):
 
 
 def reply_to_poll(user, poll, text):
-    user['cron_id'] = get_id(user['group_id'], poll['question'])
+    where_id = get_id(user['group_id'], user['thread_id'])
+    user['cron_id'] = get_id(where_id, poll['question'])
     db.set_cron_id(user)
 
     cron = db.get_cron(user['cron_id'])
@@ -207,6 +213,7 @@ def reply_to_poll(user, poll, text):
             'id': user['cron_id'],
             'poll': poll,
             'group_id': user['group_id'],
+            'thread_id': user['thread_id'],
             'triggers': {'create': [], 'notify': []}
         }
         db.create_cron(cron)

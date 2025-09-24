@@ -11,26 +11,28 @@ TG_BOT_TOKEN = os.getenv('TG_BOT_TOKEN')
 URL = 'https://api.telegram.org'
 
 
-def send_message(chat_id, text):
+def show_message(chat_id, thread_id, text):
     url = f'{URL}/bot{TG_BOT_TOKEN}/sendMessage'
-    data = {'chat_id': chat_id, 'text': text, 'parse_mode': 'MarkdownV2'}
+    data = {'chat_id': chat_id, 'text': escape(text), 'parse_mode': 'MarkdownV2'}
+    if thread_id:
+        data['message_thread_id'] = thread_id
 
-    res = requests.post(url, json=data)
-    if not res.ok:
-        return None
-    res = res.json().get('result')
-    return res and res.get('message_id')
+    requests.post(url, json=data)
 
 
-def create_poll(chat_id, poll):
+def create_poll(chat_id, thread_id, poll):
     url = f'{URL}/bot{TG_BOT_TOKEN}/sendPoll'
-    res = requests.post(url, json={
+    data = {
         'chat_id': chat_id,
         'question': poll['question'],
         'options': json.dumps(poll['options'], ensure_ascii=False),
         'is_anonymous': poll.get('is_anonymous', False),
         'allows_multiple_answers': poll.get('allows_multiple_answers', False)
-    })
+    }
+    if thread_id:
+        data['message_thread_id'] = thread_id
+
+    res = requests.post(url, json=data)
     if not res.ok:
         print(f'err: {res.text}')
         return None

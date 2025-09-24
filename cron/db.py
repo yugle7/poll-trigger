@@ -1,4 +1,3 @@
-# import ydb
 import ydb.iam
 
 import os
@@ -14,8 +13,8 @@ dotenv.load_dotenv()
 driver = ydb.Driver(
     endpoint=os.getenv('YDB_ENDPOINT'),
     database=os.getenv('YDB_DATABASE'),
-    credentials=ydb.AuthTokenCredentials(os.getenv('IAM_TOKEN'))
-    # credentials=ydb.iam.MetadataUrlCredentials()
+    # credentials=ydb.AuthTokenCredentials(os.getenv('IAM_TOKEN'))
+    credentials=ydb.iam.MetadataUrlCredentials()
 )
 
 driver.wait(fail_fast=True, timeout=50)
@@ -48,15 +47,20 @@ def execute(yql):
 
 def read_crons(key):
     now = int(time())
-    crons = execute(f'SELECT id, group_id, poll, triggers FROM crons WHERE {key}<={now} AND {key}>0;')
+    crons = execute(f'SELECT id, group_id, thread_id, poll, triggers FROM crons WHERE {key}<={now} AND {key}>0;')
     for c in crons:
         c['triggers'] = json.loads(c['triggers'])
         c['poll'] = json.loads(c['poll'])
     return crons
 
 
-def add_poll(id, group_id, cron_id=None, created=None):
-    execute(f'INSERT INTO polls (id, group_id, cron_id, created) VALUES ("{id}", {group_id}, {cron_id or "NULL"}, {created or "NULL"});')
+def update_next(cron, key):
+    t = min(get_next(t) for t in cron['triggers'][key])
+    execute(f"UPDATE crons SET {key}={t} WHERE id={cron['id']};")
+
+
+def add_poll(id, group_id, thread_id, cron_id=None, created=None):
+    execute(f'INSERT INTO polls (id, group_id, thread_id, cron_id, created) VALUES ("{id}", {group_id}, {thread_id or "NULL"}, {cron_id or "NULL"}, {created or "NULL"});')
 
 
 def get_users(cron_id):
@@ -72,8 +76,3 @@ def get_users(cron_id):
     poll = polls.pop()
     res = execute(f'SELECT username FROM votes WHERE poll_id="{poll["id"].decode()}";')
     return {u.get('username') for u in res} - users
-
-
-def update_next(cron, key):
-    t = min(get_next(t) for t in cron['triggers'][key])
-    execute(f"UPDATE crons SET {key}={t} WHERE id={cron['id']};")

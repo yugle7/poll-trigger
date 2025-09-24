@@ -85,8 +85,8 @@ def get_answer_id(chat_id, message_id):
     return res[0].get('answer_id') if res else None
 
 
-def add_poll(id, group_id, cron_id=None, created=None):
-    execute(f'INSERT INTO polls (id, group_id, cron_id, created) VALUES ("{id}", {group_id}, {cron_id or "NULL"}, {created or "NULL"});')
+def add_poll(id, group_id, thread_id, cron_id=None, created=None):
+    execute(f'INSERT INTO polls (id, group_id, thread_id, cron_id, created) VALUES ("{id}", {group_id}, {thread_id or "NULL"}, {cron_id or "NULL"}, {created or "NULL"});')
 
 
 def get_users(cron_id):
@@ -102,11 +102,6 @@ def get_users(cron_id):
     poll = polls.pop()
     res = execute(f'SELECT username FROM votes WHERE poll_id="{poll["id"].decode()}";')
     return {u.get('username') for u in res} - users
-
-
-def get_group_id(poll_id):
-    res = execute(f'SELECT group_id FROM polls WHERE id="{poll_id}";')
-    return res and res[0].get('group_id')
 
 
 def get_cron(id):
@@ -129,7 +124,7 @@ def create_user(id):
     if res:
         return True
 
-    reset_group_id({'id': id})
+    reset_where({'id': id})
     return False
 
 
@@ -140,18 +135,24 @@ def set_time_zone(user_id, time_zone):
 def set_cron_id(user):
     id = user['id']
     group_id = user['group_id'] or 'NULL'
+    thread_id = user['thread_id'] or 'NULL'
     cron_id = user['cron_id'] or 'NULL'
-    execute(f'UPDATE users SET cron_id={cron_id}, group_id={group_id} WHERE id={id};')
+    execute(f'UPDATE users SET cron_id={cron_id}, group_id={group_id}, thread_id={thread_id} WHERE id={id};')
 
 
-def set_group_id(user_id, group_id):
-    execute(f'UPDATE users SET cron_id=NULL, group_id={group_id} WHERE id={user_id};')
+def get_where(poll_id):
+    res = execute(f'SELECT group_id, thread_id FROM polls WHERE id="{poll_id}";')
+    return res and res[0]
 
 
-def reset_group_id(user):
+def set_where(user_id, group_id, thread_id):
+    execute(f'UPDATE users SET cron_id=NULL, group_id={group_id}, thread_id={thread_id or "NULL"} WHERE id={user_id};')
+
+
+def reset_where(user):
     id = user['id']
-    user['group_id'] = user['cron_id'] = None
-    execute(f'UPDATE users SET cron_id=NULL, group_id=NULL WHERE id={id};')
+    user['group_id'] = user['cron_id'] = user['thread_id'] = None
+    execute(f'UPDATE users SET cron_id=NULL, group_id=NULL, thread_id=NULL WHERE id={id};')
 
 
 def change_cron(cron):
@@ -174,13 +175,15 @@ def create_cron(cron):
     id = cron['id']
     triggers = cron['triggers']
     poll = cron['poll']
+
     group_id = cron['group_id']
+    thread_id = cron['thread_id'] or 'NULL'
 
     cron['create'] = create = min(get_next(t) for t in triggers['create']) if triggers['create'] else 0
     cron['notify'] = notify = min(get_next(t) for t in triggers['notify']) if triggers['notify'] else 0
 
-    values = f"({id}, {group_id}, '{json.dumps(poll, ensure_ascii=False)}', {create}, {notify}, '{json.dumps(triggers)}')"
-    execute(f"INSERT INTO crons (id, group_id, poll, create, notify, triggers) VALUES {values};")
+    values = f"({id}, {group_id}, {thread_id}, '{json.dumps(poll, ensure_ascii=False)}', {create}, {notify}, '{json.dumps(triggers)}')"
+    execute(f"INSERT INTO crons (id, group_id, thread_id, poll, create, notify, triggers) VALUES {values};")
 
 
 def resume_cron(cron):

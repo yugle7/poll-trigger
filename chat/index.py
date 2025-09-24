@@ -85,11 +85,17 @@ def handle(body):
                 tg.show_message(chat_id, thread_id, 'Сначала заведите личную переписку со мной')
                 return 'не узнал'
 
-            answer = mention_in_text(user_id, chat_id, thread_id)
+            title = message['chat']['title']
+            reply = message.get('reply_to_message')
+            if thread_id and reply:
+                topic = reply['forum_topic_created']['name']
+                title = f'{title} ({topic})'
+
+            answer = mention_in_text(user_id, chat_id, thread_id, title)
 
         elif text == '/start':
             if db.create_user(user_id):
-                answer = 'Отлично! Рад вас видеть!\n\nЧтобы создавать здесь опросы для вашей группы, добавьте меня в ту группу и свяжите меня с ней, отправив туда команду /start.\n\nПо умолчанию время московское. Если захотите изменить его, то отправьте мне сколько сейчас времени у вас в формате 12:34'
+                answer = 'Отлично! Рад вас видеть!\n\nЧтобы создавать здесь опросы для вашей группы, добавьте меня в ту группу и свяжите меня с ней, отправив туда команду /start\n\nПо умолчанию время московское. Если захотите изменить его, то отправьте мне сколько сейчас времени у вас в формате `12:34`'
             else:
                 answer = 'Привет! Я сейчас не привязан ни к какой группе, отправьте команду /start в той группе, где вы собираетесь создавать опросы?'
 
@@ -133,14 +139,12 @@ def handle(body):
     return answer
 
 
-def mention_in_text(user_id, group_id, thread_id):
-    title = tg.get_chat(group_id)['title']
-
+def mention_in_text(user_id, group_id, thread_id, where):
     if not tg.is_admin(user_id, group_id):
-        return f'У вас не хватает прав, чтобы создавать опросы в группе "{title}", станьте сначала в ней администратором'
+        return f'У вас не хватает прав, чтобы создавать опросы в группе "{where}", станьте сначала в ней администратором'
 
     db.set_where(user_id, group_id, thread_id)
-    return f'Теперь вы можете здесь создавать опросы и задавать время, когда их создавать в группе "{title}" и когда напоминать в них отмечаться'
+    return f'Теперь вы можете здесь создавать опросы и задавать время, когда их создавать в группе "{where}" и когда напоминать в них отмечаться'
 
 
 def set_time_zone(user_id, text):

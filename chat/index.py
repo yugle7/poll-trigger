@@ -82,7 +82,8 @@ def handle(body):
             thread_id = message.get('message_thread_id')
 
             if not db.get_user(user_id):
-                tg.show_message(chat_id, thread_id, 'Сначала заведите личную переписку со мной')
+                if tg.is_admin(user_id, chat_id):
+                    tg.show_message(chat_id, thread_id, 'Сначала заведите личную переписку со мной')
                 return 'не узнал'
 
             title = message['chat']['title']
@@ -92,6 +93,7 @@ def handle(body):
                 title = f'{title} ({topic})'
 
             answer = mention_in_text(user_id, chat_id, thread_id, title)
+            tg.show_message(chat_id, thread_id, 'Удалите все обращения ко мне здесь, чтобы кто-то случайно не нажал на него')
 
         elif text == '/start':
             if db.create_user(user_id):

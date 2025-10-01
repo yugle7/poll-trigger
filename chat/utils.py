@@ -228,7 +228,7 @@ class H:
             for y in s:
                 for x in self.q:
                     y.update(x)
-                    yield y
+                    yield y.copy()
             self.q = []
         for q in self.q:
             if 'hour' in q:

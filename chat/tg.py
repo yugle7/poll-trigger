@@ -77,7 +77,7 @@ def is_admin(user_id, group_id):
         'user_id': user_id
     })
     if not res.ok:
-        print(f'err: {res.text}')
+        print(res.text)
         return None
     status = res.json()['result'].get('status')
     return status in ('creator', 'administrator')

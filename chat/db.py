@@ -1,4 +1,3 @@
-# import ydb
 import ydb.iam
 
 import os
@@ -190,8 +189,8 @@ def resume_cron(cron):
     id = cron['id']
     trigger = cron['triggers']
 
-    cron['create'] = create = min(next(t) for t in trigger['create']) if trigger['create'] else 0
-    cron['notify'] = notify = min(next(t) for t in trigger['notify']) if trigger['notify'] else 0
+    cron['create'] = create = min(get_next(t) for t in trigger['create']) if trigger['create'] else 0
+    cron['notify'] = notify = min(get_next(t) for t in trigger['notify']) if trigger['notify'] else 0
 
     execute(f"UPDATE crons SET create={create}, notify={notify} WHERE id={id};")
 

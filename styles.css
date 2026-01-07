@@ -122,9 +122,11 @@ section input:placeholder-shown + label {
 
   width: 40px;
   height: 40px;
-  font-size: 28px;
+  font-size: 30px;
+  line-height: 40px;
   text-align: center;
-  color: rgba(200, 200, 200, 0.7);
+  background-color: var(--tg-theme-text-color);
+  opacity: 0.5;
 
   background: none;
   border: none;
@@ -133,7 +135,7 @@ section input:placeholder-shown + label {
 }
 
 .delete:hover {
-  background-color: rgba(200, 200, 200, 0.1);
+  background-color: var(--tg-theme-hint-color);
 }
 
 .who > :last-child .delete,

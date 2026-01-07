@@ -95,7 +95,7 @@ input,
 select {
   width: 100%;
   padding: 15px;
-  border: 1px solid rgb(200, 200, 200, 0.2);
+  border: 1px solid var(--hint-color);
   color: var(--text-color);
   border-radius: 10px;
   font-size: 16px;
@@ -123,8 +123,8 @@ section input:placeholder-shown + label {
   font-size: 30px;
   line-height: 40px;
   text-align: center;
-  background-color: var(--text-color);
-  opacity: 0.5;
+  color: var(--text-color);
+  opacity: 0.7;
 
   background: none;
   border: none;
@@ -133,7 +133,7 @@ section input:placeholder-shown + label {
 }
 
 .delete:hover {
-  background-color: var(--acent-color);
+  background-color: var(--hint-color);
 }
 
 .who > :last-child .delete,
@@ -142,18 +142,8 @@ section input:placeholder-shown + label {
 }
 
 form {
-  width: 320px;
+  max-width: 400px;
   margin: 0 auto;
-}
-
-button[type="submit"] {
-  width: 100%;
-  padding: 10px;
-  border-radius: 8px;
-  font-size: 20px;
-  background-color: var(--acent-color);
-  color: var(--bg-color);
-  cursor: pointer;
 }
 
 select {

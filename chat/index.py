@@ -57,7 +57,7 @@ def handle(body):
         votes = answer['option_ids']
 
         user_id = answer['user']['id']
-        username = answer['user']['username']
+        username = answer['user'].get('username', user_id)
 
         db.add_vote(poll_id, user_id, username, votes)
         return 'проголосовал в опросе'

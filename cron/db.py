@@ -13,8 +13,8 @@ dotenv.load_dotenv()
 driver = ydb.Driver(
     endpoint=os.getenv('YDB_ENDPOINT'),
     database=os.getenv('YDB_DATABASE'),
-    # credentials=ydb.AuthTokenCredentials(os.getenv('IAM_TOKEN'))
-    credentials=ydb.iam.MetadataUrlCredentials()
+    credentials=ydb.AuthTokenCredentials(os.getenv('IAM_TOKEN'))
+    # credentials=ydb.iam.MetadataUrlCredentials()
 )
 
 driver.wait(fail_fast=True, timeout=50)
@@ -63,7 +63,7 @@ def add_poll(id, group_id, thread_id, cron_id=None, created=None):
     execute(f'INSERT INTO polls (id, group_id, thread_id, cron_id, created) VALUES ("{id}", {group_id}, {thread_id or "NULL"}, {cron_id or "NULL"}, {created or "NULL"});')
 
 
-def get_users(cron_id):
+def get_usernames(cron_id):
     polls = execute(f'SELECT id, created FROM polls WHERE cron_id={cron_id} ORDER BY created;')
 
     if len(polls) < 2:
@@ -71,8 +71,8 @@ def get_users(cron_id):
 
     poll = polls.pop()
     res = execute(f'SELECT username FROM votes WHERE poll_id="{poll["id"].decode()}";')
-    users = {u.get('username') for u in res}
+    usernames = {u.get('username') for u in res}
 
     poll = polls.pop()
     res = execute(f'SELECT username FROM votes WHERE poll_id="{poll["id"].decode()}";')
-    return {u.get('username') for u in res} - users
+    return {u.get('username') for u in res} - usernames

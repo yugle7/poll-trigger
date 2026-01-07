@@ -9,10 +9,16 @@ def create_poll(cron):
         db.update_next(cron, 'create')
 
 
+def notify(username):
+    if username.isdigit():
+        return f'[user](tg://user?id={username.decode()})'
+    return f'@{username.decode()}'
+
+
 def notify_poll(cron):
-    users = db.get_users(cron['id'])
-    if users:
-        text = ', '.join('@' + u.decode() for u in users)
+    usernames = db.get_usernames(cron['id'])
+    if usernames:
+        text = ', '.join(notify(u) for u in usernames)
         tg.show_message(cron['group_id'], cron['thread_id'], f'Отмечайтесь в опросе {text}')
     db.update_next(cron, 'notify')
 
@@ -27,3 +33,10 @@ def handler(event=None, context=None):
         notify_poll(c)
 
     return {'statusCode': 200, 'body': 'ok'}
+
+
+notify_poll({
+    'id': 11523419890393760179,
+    'group_id': -1002335320681,
+    'thread_id': 2
+})

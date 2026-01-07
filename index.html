@@ -1,229 +1,62 @@
 <!DOCTYPE html>
 <html lang="en">
-
-
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <title>Регулярное создание опросов</title>
-    <style>
-        * {
-            padding: 0;
-            margin: 0;
-            border: none;
-        }
+    <link rel="stylesheet" href="styles.css" />
+  </head>
 
-        *,
-        *::before,
-        *::after {
-            box-sizing: border-box;
-        }
+  <body>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
-        body {
-            --bg-color: var(--tg-theme-bg-color);
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans Mono', 'Helvetica Neue', sans-serif, monospace;
-            font-style: normal;
-            font-weight: 400;
-            font-size: 2.5dvh;
-            line-height: 1.5;
-            word-spacing: 3px;
-            padding: 10px;
-            background-color: var(--bg-color);
-            color: var(--tg-theme-text-color);
-            color-scheme: var(--tg-color-scheme);
-        }
-        strong {
-            font-weight: 400;
-            color: var(--tg-theme-link-color);
-        }
+    <template id="form">
+      <form>
+        <section>
+          <select name="chat" required></select>
+          <label for="chat">Чат</label>
+        </section>
+        <section>
+          <input type="text" name="what" required placeholder="Что" />
+          <label for="what">Что</label>
+          <button type="button" class="delete">×</button>
+        </section>
+        <section>
+          <input type="text" name="where" placeholder="Где" />
+          <label for="where">Где</label>
+        </section>
 
-        h1 {
-            font-size: 4dvh;
-            font-weight: 500;
-            line-height: 1.1;
-            padding-top: 15px;
-            padding-bottom: 15px;
-            color: var(--tg-theme-hint-color);
-        }
+        <section>
+          <input type="text" name="start" placeholder="Когда" />
+          <label for="start">Когда</label>
+        </section>
 
-        h2 {
-            font-size: 3dvh;
-            font-weight: 500;
-            padding-bottom: 10px;
-        }
+        <section>
+          <input type="text" name="create" placeholder="Создавать" />
+          <label for="create">Создавать</label>
+        </section>
+        <section>
+          <input type="text" name="notify" placeholder="Напоминать" />
+          <label for="notify">Напоминать</label>
+        </section>
 
-        ul {
-            list-style: none;
-            padding-left: 5px;
-            padding-bottom: 10px;
-        }
+        <div class="who"></div>
+      </form>
+    </template>
 
-        ol {
-            padding-left: 25px;
-            padding-bottom: 10px;
-        }
+    <template id="section">
+      <section>
+        <input type="text" name="who" placeholder="Кто" />
+        <button type="button" class="delete">×</button>
+      </section>
+    </template>
 
-        ul li::before {
-            content: "–";
-            padding-right: 10px;
-            line-height: 1.8;
-        }
+    <div id="forms"></div>
 
-        p {
-            padding-bottom: 10px;
-        }
-    </style>
-</head>
-
-<body>
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
-
-<div>
-    <h1>Как начать?</h1>
-    <ol>
-        <li>Заведите личный чат с ботом.</li>
-        <li>
-            Задайте часовой пояс, так как бот не имеет прямого доступа к вашему времени.
-            Для этого отправьте ваше время в формате <strong>12:34</strong>.
-            По умолчанию время московское — часовой пояс <strong>UTC+3</strong>.
-            В любой момент вы можете поменять свой часовой пояс.
-        </li>
-        <li>
-            Добавьте бота в группу,
-            иначе он не сможет создавать в ней опросы.
-        </li>
-        <li>
-            В группе отправьте команду <strong>/start</strong> для бота <strong>@PollTriggerBot</strong>,
-            чтобы он понял для какой группы создавать опросы.
-        </li>
-        <li>
-            Создайте опрос в личном чате с ботом,
-            либо перешлите какой-нибудь опрос в личный чат.
-        </li>
-        <li>
-            Задайте время регулярного создания этого опроса
-            и когда напоминать отмечаться в нем.
-        </li>
-    </ol>
-    <h2>Важно:</h2>
-    <p>
-        Вы должны иметь права администратора в той группе,
-        в которой хотите создавать опросы.
-    </p>
-    <p>
-        Удалите сообщение <strong>@PollTriggerBot/start</strong> из группы,
-        чтобы пользователи не заспамили чат, нажимая на него.
-    </p>
-    <p>
-        Бот не читает сообщения в группе,
-        поэтому можете не беспокоиться о ваших персональных данных.
-    </p>
-    <p>
-        Напоминания начнут работать только с повторно созданного опроса,
-        так как он напоминает отмечаться только тем,
-        кто отметился в опросе в прошлый раз.
-    </p>
-    <p>
-        Если опрос анонимный, то напоминание не сработает.
-    </p>
-
-    <h1>Как задать расписание?</h1>
-    <ol>
-        <li>
-            Можно указать день недели и время
-            (например: «создавай в воскресенье и вторник в 21 час»).
-        </li>
-        <li>
-            Если день недели не указать,
-            бот будет запускать опрос каждый день.
-        </li>
-        <li>
-            Бот понимает только ровное количество часов.
-            Не нужно ему указывать минуты.
-        </li>
-    </ol>
-
-    <h2>Примеры:</h2>
-    <ul>
-        <li>создавай в воскресенье и вторник в 21 час</li>
-        <li>напоминай в понедельник и среду в 11 часов</li>
-        <li>создавай сб 22, создай вт 21, напомни пн 10, напомни ср 9</li>
-        <li>создавай сб вт 23, напомни пн ср 13</li>
-        <li>создавай каждый день в 11 часов</li>
-        <li>создавай 13, напоминай 17</li>
-        <li>создавай пт 18, не напоминай</li>
-    </ul>
-
-    <h1>Как создать опрос один раз сейчас?</h1>
-    <ol>
-        <li>Ответьте на сообщение с любым опросом.</li>
-        <li>Напишите команду: «создай».</li>
-    </ol>
-
-    <h1>Как напомнить отмечаться в конкретном опросе?</h1>
-    <ol>
-        <li>Ответьте на сообщение с опросом, который создал бот.</li>
-        <li>Напишите команду: «напомни».</li>
-    </ol>
-    <h2>Важно:</h2>
-    <p>
-        Если опрос анонимный,
-        то бот не знает кто проголосовал,
-        а значит и не сможет напомнить отметиться.
-    </p>
-    <p>
-        Бот напоминает отметиться только тем,
-        кто проголосовал в опросе в прошлый раз.
-        То есть в первый раз бот никого не попросит отмечаться в опросе,
-        поскольку все отметившиеся будут для него новыми.
-    </p>
-
-    <h1>Как остановить или возобновить регулярное создание опроса?</h1>
-    <ol>
-        <li>Ответьте на сообщение с опросом.</li>
-        <li>Напишите команду: «останови», «возобнови» или «удали».</li>
-    </ol>
-
-    <h1>Как посмотреть расписание опросов?</h1>
-    <p>
-        Отправьте сообщение с командой «покажи».
-        И бот покажет расписание всех опросов в группе.
-    </p>
-    <p>
-        Если сделать то же самое в ответе на опрос,
-        то бот покажет расписание только для него.
-    </p>
-
-    <h1>Как поменять группу, для которой создаются опросы?</h1>
-    <p>
-        Отправьте команду <strong>/start</strong> в новую группу
-        для бота <strong>@PollTriggerBot</strong>.
-    </p>
-    <p>
-        Либо перешлите опрос, который создал бот в той группе,
-        к которой хотите привязаться.
-
-        Бот помнит созданные им опросы,
-        и автоматически перепривяжется к новой группе и к пересланному опросу.
-    </p>
-    <h2>Важно:</h2>
-    <p>
-        Если бот не создавал пересланный опрос,
-        то он не сможет привязаться к новой группе,
-        а привяжет этот опрос к старой группе.
-    </p>
-
-    <h1>Как отвязаться от группы?</h1>
-    <p>
-        Отправьте в личный чат с ботом сообщение <strong>/start</strong>.
-    </p>
-    <h2>Важно:</h2>
-    <p>
-        Вы также отвяжетесь от группы, если перестанете быть в ней администратором.
-    </p>
-</div>
-</body>
-
+    <script src="script.js"></script>
+  </body>
 </html>

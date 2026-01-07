@@ -1,0 +1,211 @@
+* {
+  padding: 0;
+  margin: 0;
+  border: none;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+* {
+  --tg-theme-bg-color: rgb(33, 33, 33);
+  --tg-theme-hint-color: rgb(135, 116, 225);
+  --tg-theme-text-color: rgb(200, 200, 200);
+}
+
+body {
+  font-family: "Roboto", "Helvetica", system-ui, sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 28px;
+  line-height: 1.5;
+  word-spacing: 3px;
+  background-color: var(--tg-theme-bg-color);
+  color: var(--tg-theme-text-color);
+  color-scheme: var(--tg-color-scheme);
+}
+strong {
+  font-weight: 400;
+  color: var(--tg-theme-link-color);
+}
+
+h1 {
+  font-size: 4dvh;
+  font-weight: 500;
+  line-height: 1.1;
+  padding-top: 15px;
+  padding-bottom: 15px;
+  color: var(--tg-theme-hint-color);
+}
+
+h2 {
+  font-size: 3dvh;
+  font-weight: 500;
+  padding-bottom: 10px;
+}
+
+ul {
+  list-style: none;
+  padding-left: 5px;
+  padding-bottom: 10px;
+}
+
+ol {
+  padding-left: 25px;
+  padding-bottom: 10px;
+}
+
+ul li::before {
+  content: "–";
+  padding-right: 10px;
+  line-height: 1.8;
+}
+
+p {
+  padding-bottom: 10px;
+}
+
+.button {
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 20px;
+}
+
+section {
+  position: relative;
+  width: 100%;
+  margin: 20px 0;
+}
+section label {
+  position: absolute;
+  top: -8px;
+  left: 12px;
+  background: var(--tg-theme-bg-color);
+  padding: 0 4px;
+  font-size: 12px;
+  color: var(--tg-theme-hint-color);
+  pointer-events: none;
+  z-index: 1;
+}
+
+input,
+select {
+  width: 100%;
+  padding: 15px;
+  border: 1px solid rgb(200, 200, 200, 0.2);
+  color: var(--tg-theme-text-color);
+  border-radius: 10px;
+  font-size: 16px;
+  background-color: var(--tg-theme-bg-color);
+  outline: none;
+}
+
+input:hover {
+  border: 1px solid var(--tg-theme-hint-color);
+}
+input:focus {
+  border: 1px solid var(--tg-theme-hint-color);
+}
+
+section input:placeholder-shown + label {
+  display: none;
+}
+
+.delete {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+
+  width: 40px;
+  height: 40px;
+  font-size: 28px;
+  text-align: center;
+  color: rgba(200, 200, 200, 0.7);
+
+  background: none;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.delete:hover {
+  background-color: rgba(200, 200, 200, 0.1);
+}
+
+.who > :last-child .delete,
+#forms > :last-child label ~ .delete {
+  display: none;
+}
+
+form {
+  width: 320px;
+  margin: 0 auto;
+}
+
+button[type="submit"] {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 20px;
+  background-color: var(--tg-theme-hint-color);
+  color: var(--tg-theme-bg-color);
+  cursor: pointer;
+}
+
+select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+hr {
+  height: 1px;
+  background-color: var(--tg-theme-hint-color);
+  opacity: 0.5;
+  border: none;
+  margin: 50px 10px;
+}
+
+/* .checkbox {
+  position: relative;
+}
+
+.checkbox input {
+  opacity: 0;
+  position: absolute;
+  width: 1px;
+  height: 1px;
+}
+
+.box {
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  border: 2px solid rgba(200, 200, 200, 0.3);
+  border-radius: 4px;
+  cursor: pointer;
+  vertical-align: middle;
+  margin-right: 8px;
+}
+
+.checkbox:hover .box {
+  border-color: var(--tg-theme-hint-color);
+}
+
+.checkbox input:checked + .box {
+  background-color: var(--tg-theme-hint-color);
+  border-color: var(--tg-theme-hint-color);
+}
+
+.checkbox input:checked + .box::after {
+  content: "✓";
+  color: var(--tg-theme-text-color);
+  font-size: 20px;
+  position: absolute;
+  top: 4px;
+  left: 4px;
+} */

@@ -3,12 +3,10 @@ Telegram.WebApp.onEvent("themeChanged", function () {
   document.documentElement.className = Telegram.WebApp.colorScheme;
 });
 
-window.Telegram.WebApp.sendData("старт");
+Telegram.WebApp.sendData("старт");
 
 let params = new URLSearchParams(Telegram.WebApp.initData);
-let user = JSON.parse(decodeURIComponent(params.get("user"))) || {
-  id: 164671585,
-};
+let user = JSON.parse(decodeURIComponent(params.get("user")));
 
 let hash = params.get("hash");
 params.delete("hash");

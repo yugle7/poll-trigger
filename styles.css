@@ -11,9 +11,9 @@
 }
 
 /* * {
-  --tg-theme-bg-color: rgb(33, 33, 33);
-  --tg-theme-hint-color: rgb(135, 116, 225);
-  --tg-theme-text-color: rgb(200, 200, 200);
+  --bg-color: rgb(33, 33, 33);
+  --acent-color: rgb(135, 116, 225);
+  --text-color: rgb(200, 200, 200);
 } */
 
 body {
@@ -23,13 +23,13 @@ body {
   font-size: 28px;
   line-height: 1.5;
   word-spacing: 3px;
-  background-color: var(--tg-theme-bg-color);
-  color: var(--tg-theme-text-color);
-  color-scheme: var(--tg-color-scheme);
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  color-scheme: var(--tg-color-scheme, "dark");
 }
 strong {
   font-weight: 400;
-  color: var(--tg-theme-link-color);
+  color: var(--acent-color);
 }
 
 h1 {
@@ -38,7 +38,7 @@ h1 {
   line-height: 1.1;
   padding-top: 15px;
   padding-bottom: 15px;
-  color: var(--tg-theme-hint-color);
+  color: var(--acent-color);
 }
 
 h2 {
@@ -83,10 +83,10 @@ section label {
   position: absolute;
   top: -8px;
   left: 12px;
-  background: var(--tg-theme-bg-color);
+  background: var(--bg-color);
   padding: 0 4px;
   font-size: 12px;
-  color: var(--tg-theme-hint-color);
+  color: var(--acent-color);
   pointer-events: none;
   z-index: 1;
 }
@@ -96,18 +96,16 @@ select {
   width: 100%;
   padding: 15px;
   border: 1px solid rgb(200, 200, 200, 0.2);
-  color: var(--tg-theme-text-color);
+  color: var(--text-color);
   border-radius: 10px;
   font-size: 16px;
-  background-color: var(--tg-theme-bg-color);
+  background-color: var(--bg-color);
   outline: none;
 }
 
-input:hover {
-  border: 1px solid var(--tg-theme-hint-color);
-}
+input:hover,
 input:focus {
-  border: 1px solid var(--tg-theme-hint-color);
+  border: 1px solid var(--acent-color);
 }
 
 section input:placeholder-shown + label {
@@ -125,7 +123,7 @@ section input:placeholder-shown + label {
   font-size: 30px;
   line-height: 40px;
   text-align: center;
-  background-color: var(--tg-theme-text-color);
+  background-color: var(--text-color);
   opacity: 0.5;
 
   background: none;
@@ -135,7 +133,7 @@ section input:placeholder-shown + label {
 }
 
 .delete:hover {
-  background-color: var(--tg-theme-hint-color);
+  background-color: var(--acent-color);
 }
 
 .who > :last-child .delete,
@@ -153,8 +151,8 @@ button[type="submit"] {
   padding: 10px;
   border-radius: 8px;
   font-size: 20px;
-  background-color: var(--tg-theme-hint-color);
-  color: var(--tg-theme-bg-color);
+  background-color: var(--acent-color);
+  color: var(--bg-color);
   cursor: pointer;
 }
 
@@ -166,7 +164,7 @@ select {
 
 hr {
   height: 1px;
-  background-color: var(--tg-theme-hint-color);
+  background-color: var(--acent-color);
   opacity: 0.5;
   border: none;
   margin: 50px 10px;
@@ -195,17 +193,17 @@ hr {
 }
 
 .checkbox:hover .box {
-  border-color: var(--tg-theme-hint-color);
+  border-color: var(--acent-color);
 }
 
 .checkbox input:checked + .box {
-  background-color: var(--tg-theme-hint-color);
-  border-color: var(--tg-theme-hint-color);
+  background-color: var(--acent-color);
+  border-color: var(--acent-color);
 }
 
 .checkbox input:checked + .box::after {
   content: "✓";
-  color: var(--tg-theme-text-color);
+  color: var(--text-color);
   font-size: 20px;
   position: absolute;
   top: 4px;

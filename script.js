@@ -151,6 +151,7 @@ function delForm(e) {
   form.remove();
 }
 
+Telegram.WebApp.MainButton.show();
 Telegram.WebApp.MainButton.setText("Сохранить");
 
 Telegram.WebApp.MainButton.onClick(() => {

@@ -155,10 +155,12 @@ Telegram.WebApp.MainButton.show();
 Telegram.WebApp.MainButton.setText("Сохранить");
 
 Telegram.WebApp.MainButton.onClick(() => {
+  Telegram.WebApp.sendData("начал");
   forms.forEach((form) => {
     const formData = new FormData(form);
     const data = Object.fromEntries(formData);
     Telegram.WebApp.sendData(JSON.stringify(data));
   });
+  Telegram.WebApp.sendData("закончил");
   Telegram.WebApp.close();
 });

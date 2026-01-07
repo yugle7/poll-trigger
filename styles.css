@@ -143,7 +143,7 @@ section input:placeholder-shown + label {
 
 form {
   max-width: 400px;
-  margin: 0 auto;
+  margin: 10px auto;
 }
 
 select {

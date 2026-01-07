@@ -10,11 +10,11 @@
   box-sizing: border-box;
 }
 
-* {
+/* * {
   --tg-theme-bg-color: rgb(33, 33, 33);
   --tg-theme-hint-color: rgb(135, 116, 225);
   --tg-theme-text-color: rgb(200, 200, 200);
-}
+} */
 
 body {
   font-family: "Roboto", "Helvetica", system-ui, sans-serif;

@@ -35,7 +35,7 @@ let data = {};
   if (!res.ok) {
     return;
   }
-  data = await response.json();
+  data = await res.json();
 
   data.forms.forEach((f) => {
     const form = FORM.content.cloneNode(true).firstElementChild;
@@ -154,7 +154,13 @@ Telegram.WebApp.MainButton.setText("Сохранить");
 Telegram.WebApp.MainButton.onClick(async () => {
   data = forms.map((form) => Object.fromEntries(new FormData(form)));
 
-  const res = await fetch(url);
+  const res = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  });
   if (!res.ok) {
     return;
   }

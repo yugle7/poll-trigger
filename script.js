@@ -154,6 +154,10 @@ Telegram.WebApp.MainButton.setText("Сохранить Опросы");
 Telegram.WebApp.MainButton.onClick(async (e) => {
   e.preventDefault();
 
+  const p = document.createElement("p");
+  p.textContent = "Сохраняю...";
+  forms.appendChild(p);
+
   const data = Array.from(forms.querySelectorAll("form")).map((form) => {
     const formData = new FormData(form);
     return Object.fromEntries(formData.entries());
@@ -168,7 +172,8 @@ Telegram.WebApp.MainButton.onClick(async (e) => {
       body: JSON.stringify(data),
     });
   } catch (e) {
-    const p = (document.createElement("p").textContent = e.message);
+    const p = document.createElement("p");
+    p.textContent = e.message;
     forms.appendChild(p);
   }
 });

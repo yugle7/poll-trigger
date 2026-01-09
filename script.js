@@ -172,12 +172,8 @@ const sendForms = async () => {
   }
 };
 
-Telegram.WebApp.MainButton.onClick((e) => {
-  e.preventDefault();
-
+Telegram.WebApp.MainButton.onClick(() => {
   const p = document.createElement("p");
-  p.textContent = "Сохраняю...";
+  p.textContent = "Сохраняю";
   forms.appendChild(p);
-
-  sendForms();
 });

@@ -154,10 +154,9 @@ Telegram.WebApp.BottomButton.setText("Сохранить Опросы");
 Telegram.WebApp.BottomButton.onClick(async (e) => {
   e.preventDefault();
 
-  const d = forms.getElementsByTagName("form");
-  data = Array.from(d).map((form) => {
-    const d = new FormData(form);
-    return Object.fromEntries(d.entries());
+  const data = Array.from(forms.querySelectorAll("form")).map((form) => {
+    const formData = new FormData(form);
+    return Object.fromEntries(formData.entries());
   });
   console.log(data);
 

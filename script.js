@@ -158,7 +158,6 @@ Telegram.WebApp.MainButton.onClick(async (e) => {
     const formData = new FormData(form);
     return Object.fromEntries(formData.entries());
   });
-  console.log(data);
 
   try {
     await fetch(url, {
@@ -169,7 +168,7 @@ Telegram.WebApp.MainButton.onClick(async (e) => {
       body: JSON.stringify(data),
     });
   } catch (e) {
-    url.searchParams.set("forms", JSON.stringify(data));
-    await fetch(url);
+    const p = (document.createElement("p").textContent = e.message);
+    forms.appendChild(p);
   }
 });

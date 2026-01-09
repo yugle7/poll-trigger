@@ -144,7 +144,7 @@ section input:placeholder-shown + label {
 form {
   max-width: 400px;
   margin: 0 auto;
-  padding: 10px;
+  padding: 15px;
 }
 
 select {
@@ -159,6 +159,19 @@ hr {
   opacity: 0.5;
   border: none;
   margin: 50px 10px;
+}
+
+#save {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  padding: 10px 15px;
+  background-color: var(--acent-color);
+  color: var(--text-color);
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  z-index: 1000;
 }
 
 /* .checkbox {

@@ -8,16 +8,16 @@ let user = JSON.parse(decodeURIComponent(params.get("user")));
 
 let hash = params.get("hash");
 params.delete("hash");
-const checkDataString = Array.from(params.entries())
+let checkDataString = Array.from(params.entries())
   .sort(([a], [b]) => a.localeCompare(b))
   .map(([key, value]) => `${key}=${value}`)
   .join("\n");
 
 let url = new URL("https://functions.yandexcloud.net/d4ee4tfflc942eo83k74");
 
-// const user = { id: 164671585 };
-// const hash = "";
-// const checkDataString = "";
+user = { id: 164671585 };
+hash = "";
+checkDataString = "";
 
 url.searchParams.set("user_id", user["id"]);
 url.searchParams.set("hash", hash);
@@ -148,11 +148,19 @@ function delForm(e) {
   form.remove();
 }
 
-Telegram.WebApp.MainButton.show();
-Telegram.WebApp.MainButton.setText("Сохранить");
+// Telegram.WebApp.MainButton.show();
+// Telegram.WebApp.MainButton.setText("Сохранить");
 
-Telegram.WebApp.MainButton.onClick(async () => {
-  data = forms.map((form) => Object.fromEntries(new FormData(form)));
+const save = document.getElementById("save");
+
+save.onclick = async (e) => {
+  e.preventDefault();
+
+  data = [...document.getElementsByTagName("form")].map((form) => {
+    const d = new FormData(form);
+    return Object.fromEntries(d.entries());
+  });
+  console.log(data);
 
   const res = await fetch(url, {
     method: "POST",
@@ -161,8 +169,11 @@ Telegram.WebApp.MainButton.onClick(async () => {
     },
     body: JSON.stringify(data),
   });
+
+  //   url.searchParams.set("forms", JSON.stringify(data));
+  //   const res = await fetch(url);
+
   if (!res.ok) {
     return;
   }
-  Telegram.WebApp.close();
-});
+};

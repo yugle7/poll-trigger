@@ -148,14 +148,14 @@ function delForm(e) {
   form.remove();
 }
 
-const save = Telegram.WebApp.BottomButton;
-save.show();
-save.setText("Сохранить");
+Telegram.WebApp.BottomButton.show();
+Telegram.WebApp.BottomButton.setText("Сохранить Опросы");
 
-save.onClick(async (e) => {
+Telegram.WebApp.BottomButton.onClick(async (e) => {
   e.preventDefault();
 
-  data = [...document.getElementsByTagName("form")].map((form) => {
+  const d = forms.getElementsByTagName("form");
+  data = Array.from(d).map((form) => {
     const d = new FormData(form);
     return Object.fromEntries(d.entries());
   });

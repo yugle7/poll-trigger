@@ -157,16 +157,22 @@ const sendForms = async () => {
       const formData = new FormData(form);
       return Object.fromEntries(formData.entries());
     });
-    await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-    });
+    try {
+      await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+    } catch (e) {
+      const p = document.createElement("p");
+      p.textContent = "1" + e.message;
+      forms.appendChild(p);
+    }
   } catch (e) {
     const p = document.createElement("p");
-    p.textContent = e.message;
+    p.textContent = "2" + e.message;
     forms.appendChild(p);
   }
 };

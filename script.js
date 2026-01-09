@@ -156,27 +156,9 @@ const sendForms = async () => {
     const formData = new FormData(form);
     return Object.fromEntries(formData.entries());
   });
-  try {
-    // await fetch(url, {
-    //   method: "POST",
-    //   headers: {
-    //     "Content-Type": "application/json",
-    //   },
-    //   body: JSON.stringify(data),
-    // });
-    url.searchParams.set("forms", JSON.stringify(data));
-    await fetch(url);
-  } catch (e) {
-    const p = document.createElement("p");
-    p.textContent = e.message;
-    forms.appendChild(p);
-  }
+  data.pop();
+  url.searchParams.set("forms", JSON.stringify(data));
+  await fetch(url);
 };
 
-Telegram.WebApp.MainButton.onClick(() => {
-  const p = document.createElement("p");
-  p.textContent = "Сохраняю";
-  forms.appendChild(p);
-
-  sendForms();
-});
+Telegram.WebApp.MainButton.onClick(sendForms);

@@ -31,51 +31,13 @@ const SECTION = document.getElementById("section");
 let data = {};
 
 (async function () {
-  console.log(url);
+  const res = await fetch(url);
+  if (!res.ok) {
+    return;
+  }
+  data = await response.json();
 
-  const response = await fetch(url);
-  if (response.ok) {
-    data = await response.json();
-
-    data.forms.forEach((f) => {
-      const form = FORM.content.cloneNode(true).firstElementChild;
-
-      const options = form.querySelector('select[name="chat"]');
-      data.chats.forEach((c, i) => {
-        const option = document.createElement("option");
-        option.value = i;
-        option.textContent = c["thread"] || c["group"];
-        if (i === f.chat) {
-          option.selected = true;
-        }
-        options.appendChild(option);
-      });
-
-      const what = form.querySelector('input[name="what"]');
-      what.value = f.what;
-      what.parentElement.lastElementChild.onclick = delForm;
-
-      form.querySelector('input[name="where"]').value = f.where || "";
-      form.querySelector('input[name="start"]').value = f.start || "";
-      form.querySelector('input[name="create"]').value = f.create || "";
-      form.querySelector('input[name="notify"]').value = f.notify || "";
-
-      const sections = form.querySelector(".who");
-      f.who.forEach((w) => {
-        const section = SECTION.content.cloneNode(true).firstElementChild;
-
-        section.lastElementChild.onclick = delWho;
-        section.firstElementChild.value = w;
-        sections.appendChild(section);
-      });
-      const section = SECTION.content.cloneNode(true).firstElementChild;
-      section.firstElementChild.onclick = addWho;
-      sections.appendChild(section);
-
-      forms.appendChild(form);
-      forms.appendChild(document.createElement("hr"));
-    });
-
+  data.forms.forEach((f) => {
     const form = FORM.content.cloneNode(true).firstElementChild;
 
     const options = form.querySelector('select[name="chat"]');
@@ -83,19 +45,56 @@ let data = {};
       const option = document.createElement("option");
       option.value = i;
       option.textContent = c["thread"] || c["group"];
+      if (i === f.chat) {
+        option.selected = true;
+      }
       options.appendChild(option);
     });
 
     const what = form.querySelector('input[name="what"]');
-    what.onclick = addForm;
+    what.value = f.what;
+    what.parentElement.lastElementChild.onclick = delForm;
+
+    form.querySelector('input[name="where"]').value = f.where || "";
+    form.querySelector('input[name="start"]').value = f.start || "";
+    form.querySelector('input[name="create"]').value = f.create || "";
+    form.querySelector('input[name="notify"]').value = f.notify || "";
 
     const sections = form.querySelector(".who");
+    f.who.forEach((w) => {
+      const section = SECTION.content.cloneNode(true).firstElementChild;
+
+      section.lastElementChild.onclick = delWho;
+      section.firstElementChild.value = w;
+      sections.appendChild(section);
+    });
     const section = SECTION.content.cloneNode(true).firstElementChild;
     section.firstElementChild.onclick = addWho;
     sections.appendChild(section);
 
     forms.appendChild(form);
-  }
+    forms.appendChild(document.createElement("hr"));
+  });
+
+  const form = FORM.content.cloneNode(true).firstElementChild;
+
+  const options = form.querySelector('select[name="chat"]');
+  data.chats.forEach((c, i) => {
+    const option = document.createElement("option");
+    option.value = i;
+    option.textContent = c["thread"] || c["group"];
+    options.appendChild(option);
+  });
+
+  const what = form.querySelector('input[name="what"]');
+  what.onclick = addForm;
+
+  const sections = form.querySelector(".who");
+  const section = SECTION.content.cloneNode(true).firstElementChild;
+  section.firstElementChild.onclick = addWho;
+  sections.appendChild(section);
+
+  forms.appendChild(form);
 })();
 
 function addWho(e) {
@@ -152,9 +151,12 @@ function delForm(e) {
 Telegram.WebApp.MainButton.show();
 Telegram.WebApp.MainButton.setText("Сохранить");
 
-Telegram.WebApp.MainButton.onClick(() => {
+Telegram.WebApp.MainButton.onClick(async () => {
   data = forms.map((form) => Object.fromEntries(new FormData(form)));
-  Telegram.WebApp.sendData(JSON.stringify(data));
-  Telegram.WebApp.sendData("закончил");
+
+  const res = await fetch(url);
+  if (!res.ok) {
+    return;
+  }
   Telegram.WebApp.close();
 });

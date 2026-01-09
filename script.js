@@ -148,12 +148,11 @@ function delForm(e) {
   form.remove();
 }
 
-// Telegram.WebApp.MainButton.show();
-// Telegram.WebApp.MainButton.setText("Сохранить");
+const save = Telegram.WebApp.BottomButton;
+save.show();
+save.setText("Сохранить");
 
-const save = document.getElementById("save");
-
-save.onclick = async (e) => {
+save.onClick(async (e) => {
   e.preventDefault();
 
   data = [...document.getElementsByTagName("form")].map((form) => {
@@ -162,18 +161,20 @@ save.onclick = async (e) => {
   });
   console.log(data);
 
-  const res = await fetch(url, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(data),
-  });
+  //   try {
+  //       const res = await fetch(url, {
+  //     method: "POST",
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //     },
+  //     body: JSON.stringify(data),
+  //   });
+  //   }
 
-  //   url.searchParams.set("forms", JSON.stringify(data));
-  //   const res = await fetch(url);
+  url.searchParams.set("forms", JSON.stringify(data));
+  const res = await fetch(url);
 
   if (!res.ok) {
     return;
   }
-};
+});

@@ -153,7 +153,7 @@ Telegram.WebApp.MainButton.setText("сохранить все опросы");
 
 const sendForms = async () => {
   try {
-    const data = Array.from(forms.querySelectorAll("form")).map((form) => {
+    const data = [...forms.getElementsByTagName("form")].map((form) => {
       const formData = new FormData(form);
       return Object.fromEntries(formData.entries());
     });

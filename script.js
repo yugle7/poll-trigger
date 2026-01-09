@@ -161,20 +161,16 @@ Telegram.WebApp.BottomButton.onClick(async (e) => {
   });
   console.log(data);
 
-  //   try {
-  //       const res = await fetch(url, {
-  //     method: "POST",
-  //     headers: {
-  //       "Content-Type": "application/json",
-  //     },
-  //     body: JSON.stringify(data),
-  //   });
-  //   }
-
-  url.searchParams.set("forms", JSON.stringify(data));
-  const res = await fetch(url);
-
-  if (!res.ok) {
-    return;
+  try {
+    await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
+  } catch (e) {
+    url.searchParams.set("forms", JSON.stringify(data));
+    await fetch(url);
   }
 });

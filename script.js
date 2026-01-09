@@ -149,7 +149,7 @@ function delForm(e) {
 }
 
 Telegram.WebApp.MainButton.show();
-Telegram.WebApp.MainButton.setText("Сохранить Опросы");
+Telegram.WebApp.MainButton.setText("сохранить все опросы");
 
 const sendForms = async () => {
   const data = Array.from(forms.querySelectorAll("form")).map((form) => {
@@ -172,7 +172,7 @@ const sendForms = async () => {
   }
 };
 
-Telegram.WebApp.MainButton.onClick(async (e) => {
+Telegram.WebApp.MainButton.onClick((e) => {
   e.preventDefault();
 
   const p = document.createElement("p");

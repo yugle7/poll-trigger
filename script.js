@@ -152,27 +152,23 @@ Telegram.WebApp.MainButton.show();
 Telegram.WebApp.MainButton.setText("сохранить все опросы");
 
 const sendForms = async () => {
+  const data = Array.from(forms.querySelectorAll("form")).map((form) => {
+    const formData = new FormData(form);
+    return Object.fromEntries(formData.entries());
+  });
   try {
-    const data = [...forms.getElementsByTagName("form")].map((form) => {
-      const formData = new FormData(form);
-      return Object.fromEntries(formData.entries());
-    });
-    try {
-      await fetch(url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
-    } catch (e) {
-      const p = document.createElement("p");
-      p.textContent = "1" + e.message;
-      forms.appendChild(p);
-    }
+    // await fetch(url, {
+    //   method: "POST",
+    //   headers: {
+    //     "Content-Type": "application/json",
+    //   },
+    //   body: JSON.stringify(data),
+    // });
+    url.searchParams.set("forms", JSON.stringify(data));
+    await fetch(url);
   } catch (e) {
     const p = document.createElement("p");
-    p.textContent = "2" + e.message;
+    p.textContent = e.message;
     forms.appendChild(p);
   }
 };

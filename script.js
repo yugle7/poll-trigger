@@ -151,7 +151,7 @@ function delForm(e) {
 Telegram.WebApp.MainButton.show();
 Telegram.WebApp.MainButton.setText("сохранить все опросы");
 
-const sendForms = async () => {
+Telegram.WebApp.MainButton.onClick(async () => {
   const data = Array.from(forms.querySelectorAll("form")).map((form) => {
     const formData = new FormData(form);
     return Object.fromEntries(formData.entries());
@@ -159,6 +159,4 @@ const sendForms = async () => {
   data.pop();
   url.searchParams.set("forms", JSON.stringify(data));
   await fetch(url);
-};
-
-Telegram.WebApp.MainButton.onClick(sendForms);
+});

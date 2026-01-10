@@ -1,11 +1,26 @@
 from datetime import datetime, timedelta
 
+MONTHS = [
+    "янв",
+    "фев",
+    "мар",
+    "апр",
+    "май",
+    "июн",
+    "июл",
+    "авг",
+    "сен",
+    "окт",
+    "ноя",
+    "дек",
+]
 
-def get_start_date(triggers, time_zone):
-    time_zone = timedelta(hours=time_zone)
+
+def get_start_date(cron):
+    triggers = cron["triggers"]
     days = (triggers["start"]["weekday"] - triggers["create"]["weekday"]) % 7
-    start = datetime.now() + time_zone + timedelta(days=days)
-    return start.strftime("DD.MM")
+    start = datetime.now() + timedelta(days=days, hours=cron["time_zone"])
+    return f"{start.day} {MONTHS[start.month - 1]}"
 
 
 def get_when(trigger, time_zone):

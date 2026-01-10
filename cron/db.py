@@ -13,8 +13,8 @@ dotenv.load_dotenv()
 driver = ydb.Driver(
     endpoint=os.getenv("YDB_ENDPOINT"),
     database=os.getenv("YDB_DATABASE"),
-    credentials=ydb.AuthTokenCredentials(os.getenv("IAM_TOKEN")),
-    # credentials=ydb.iam.MetadataUrlCredentials()
+    # credentials=ydb.AuthTokenCredentials(os.getenv("IAM_TOKEN")),
+    credentials=ydb.iam.MetadataUrlCredentials(),
 )
 
 driver.wait(fail_fast=True, timeout=50)
@@ -41,7 +41,7 @@ def execute(yql):
 def read_crons(key):
     now = int(time())
     crons = execute(
-        f"SELECT id, group_id, thread_id, poll, triggers FROM crons WHERE {key}<={now} AND {key}>0;"
+        f"SELECT id, group_id, thread_id, poll, triggers, time_zone FROM crons WHERE {key}<={now} AND {key}>0;"
     )
     for c in crons:
         c["triggers"] = json.loads(c["triggers"])
@@ -50,8 +50,8 @@ def read_crons(key):
 
 
 def update_when(cron, key):
-    t = min(get_when(t, cron["time_zone"]) for t in cron["triggers"][key])
-    execute(f"UPDATE crons SET {key}={t} WHERE id={cron['id']};")
+    when = get_when(cron["triggers"][key], cron["time_zone"])
+    execute(f"UPDATE crons SET {key}={when} WHERE id={cron['id']};")
 
 
 def add_poll(id, group_id, thread_id, cron_id=None, created=None):

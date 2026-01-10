@@ -46,12 +46,14 @@ def get_cron(form):
     create = get_trigger(form["create"])
     notify = get_trigger(form["notify"])
 
+    question = ", ".join(q for q in [form["what"], form["start"], form["where"]] if q)
+
     return {
         "id": int(form["id"]),
         "group_id": group_id,
         "thread_id": thread_id,
         "poll": {
-            "question": f"{form['what']} {form['start']} ({form['where']})",
+            "question": question,
             "options": [who for who in form["who"] if who],
             "is_anonymous": False,
             "allows_multiple_answers": False,

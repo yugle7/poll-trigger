@@ -15,9 +15,9 @@ let checkDataString = Array.from(params.entries())
 
 let url = new URL("https://functions.yandexcloud.net/d4ee4tfflc942eo83k74");
 
-user = { id: 164671585 };
-hash = "";
-checkDataString = "";
+// user = { id: 164671585 };
+// hash = "";
+// checkDataString = "";
 
 url.searchParams.set("user_id", user["id"]);
 url.searchParams.set("hash", hash);
@@ -143,11 +143,20 @@ Telegram.WebApp.MainButton.show();
 Telegram.WebApp.MainButton.setText("сохранить все опросы");
 
 Telegram.WebApp.MainButton.onClick(async () => {
-  const data = Array.from(forms.querySelectorAll("form")).map((form) => {
-    const formData = new FormData(form);
-    return Object.fromEntries(formData.entries());
-  });
-  data.pop();
+  const data = [...forms.querySelectorAll("form")]
+    .map((form) => {
+      const formData = new FormData(form);
+      const entries = Array.from(formData.entries());
+
+      const result = Object.fromEntries(entries);
+      result.who = entries
+        .filter(([k, v]) => v !== "" && k === "who")
+        .map(([, v]) => v);
+
+      return result;
+    })
+    .filter((f) => f.what);
+
   url.searchParams.set("forms", JSON.stringify(data));
   await fetch(url);
 });

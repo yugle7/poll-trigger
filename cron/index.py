@@ -1,6 +1,7 @@
+from utils import get_start_date
+
 import db
 import tg
-from utils import get_start_date
 
 
 def create_poll(cron):

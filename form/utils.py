@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from uuid import uuid4
 
 WEEKDAYS = ["пн", "вт", "ср", "чт", "пт", "сб", "вс"]
 
@@ -24,8 +25,16 @@ def get_when(trigger, time_zone):
     return int((t - time_zone).timestamp())
 
 
+def get_random_id():
+    return uuid4().int % (1 << 64)
+
+
 def get_cron(form):
-    group_id, thread_id = map(int, form["chat"].split())
+    if " " in form["chat"]:
+        group_id = int(form["chat"])
+        thread_id = "NULL"
+    else:
+        group_id, thread_id = map(int, form["chat"].split())
 
     time_zone = form.get("time_zone", 3)
     start = get_trigger(form["start"])
@@ -33,6 +42,7 @@ def get_cron(form):
     notify = get_trigger(form["notify"])
 
     return {
+        "id": int(form["id"]) if form["id"] else get_random_id(),
         "group_id": group_id,
         "thread_id": thread_id,
         "poll": {

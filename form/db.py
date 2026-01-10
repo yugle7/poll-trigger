@@ -57,10 +57,10 @@ def save_data(user_id, forms):
 
     crons = [get_cron(form) for form in forms]
     values = ",".join(
-        f"({cron['id']}, {user_id}, {cron['group_id']}, {cron['thread_id']}, '{json.dumps(cron['poll'])}', {cron['create']}, {cron['notify']}, '{json.dumps(cron['triggers'])}')"
+        f"({cron['id']}, {user_id}, {cron['group_id']}, {cron['thread_id']}, '{json.dumps(cron['poll'])}', {cron['create']}, {cron['notify']}, '{json.dumps(cron['triggers'])}', {cron['time_zone']})"
         for cron in crons
     )
     execute(f"DELETE FROM crons WHERE user_id={user_id};")
     execute(
-        f"INSERT INTO crons (id, user_id, group_id, thread_id, poll, create, notify, triggers) VALUES {values};"
+        f"INSERT INTO crons (id, user_id, group_id, thread_id, poll, create, notify, triggers, time_zone) VALUES {values};"
     )

@@ -24,9 +24,20 @@
 
     <template id="form">
       <form>
+        <input type="text" name="id" hidden />
         <section>
           <select name="chat" required></select>
           <label for="chat">Чат</label>
+        </section>
+        <section>
+          <input
+            type="number"
+            name="time_zone"
+            value="3"
+            required
+            placeholder="Часовой пояс"
+          />
+          <label for="time_zone">Часовой пояс</label>
         </section>
         <section>
           <input type="text" name="what" required placeholder="Что" />

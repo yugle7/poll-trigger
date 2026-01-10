@@ -31,15 +31,16 @@ def get_random_id():
 
 def get_cron(form):
     if " " in form["chat"]:
+        group_id, thread_id = map(int, form["chat"].split())
+    else:
         group_id = int(form["chat"])
         thread_id = "NULL"
-    else:
-        group_id, thread_id = map(int, form["chat"].split())
 
-    time_zone = form.get("time_zone", 3)
     start = get_trigger(form["start"])
     create = get_trigger(form["create"])
     notify = get_trigger(form["notify"])
+
+    time_zone = int(form["time_zone"])
 
     return {
         "id": int(form["id"]) if form["id"] else get_random_id(),

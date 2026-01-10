@@ -6,14 +6,14 @@ from time import time
 
 import dotenv
 
-from utils import get_next
+from utils import get_when
 
 dotenv.load_dotenv()
 
 driver = ydb.Driver(
-    endpoint=os.getenv('YDB_ENDPOINT'),
-    database=os.getenv('YDB_DATABASE'),
-    credentials=ydb.AuthTokenCredentials(os.getenv('IAM_TOKEN'))
+    endpoint=os.getenv("YDB_ENDPOINT"),
+    database=os.getenv("YDB_DATABASE"),
+    credentials=ydb.AuthTokenCredentials(os.getenv("IAM_TOKEN")),
     # credentials=ydb.iam.MetadataUrlCredentials()
 )
 
@@ -21,20 +21,13 @@ driver.wait(fail_fast=True, timeout=50)
 
 pool = ydb.SessionPool(driver)
 
-settings = ydb \
-    .BaseRequestSettings() \
-    .with_timeout(30) \
-    .with_operation_timeout(20)
+settings = ydb.BaseRequestSettings().with_timeout(30).with_operation_timeout(20)
 
 
 def execute(yql):
     def wrapper(session):
         try:
-            res = session.transaction().execute(
-                yql,
-                commit_tx=True,
-                settings=settings
-            )
+            res = session.transaction().execute(yql, commit_tx=True, settings=settings)
             return res[0].rows if len(res) else []
 
         except Exception as e:
@@ -47,32 +40,38 @@ def execute(yql):
 
 def read_crons(key):
     now = int(time())
-    crons = execute(f'SELECT id, group_id, thread_id, poll, triggers FROM crons WHERE {key}<={now} AND {key}>0;')
+    crons = execute(
+        f"SELECT id, group_id, thread_id, poll, triggers FROM crons WHERE {key}<={now} AND {key}>0;"
+    )
     for c in crons:
-        c['triggers'] = json.loads(c['triggers'])
-        c['poll'] = json.loads(c['poll'])
+        c["triggers"] = json.loads(c["triggers"])
+        c["poll"] = json.loads(c["poll"])
     return crons
 
 
-def update_next(cron, key):
-    t = min(get_next(t) for t in cron['triggers'][key])
+def update_when(cron, key):
+    t = min(get_when(t, cron["time_zone"]) for t in cron["triggers"][key])
     execute(f"UPDATE crons SET {key}={t} WHERE id={cron['id']};")
 
 
 def add_poll(id, group_id, thread_id, cron_id=None, created=None):
-    execute(f'INSERT INTO polls (id, group_id, thread_id, cron_id, created) VALUES ("{id}", {group_id}, {thread_id or "NULL"}, {cron_id or "NULL"}, {created or "NULL"});')
+    execute(
+        f'INSERT INTO polls (id, group_id, thread_id, cron_id, created) VALUES ("{id}", {group_id}, {thread_id or "NULL"}, {cron_id or "NULL"}, {created or "NULL"});'
+    )
 
 
 def get_usernames(cron_id):
-    polls = execute(f'SELECT id, created FROM polls WHERE cron_id={cron_id} ORDER BY created;')
+    polls = execute(
+        f"SELECT id, created FROM polls WHERE cron_id={cron_id} ORDER BY created;"
+    )
 
     if len(polls) < 2:
         return []
 
     poll = polls.pop()
     res = execute(f'SELECT username FROM votes WHERE poll_id="{poll["id"].decode()}";')
-    usernames = {u.get('username') for u in res}
+    usernames = {u.get("username") for u in res}
 
     poll = polls.pop()
     res = execute(f'SELECT username FROM votes WHERE poll_id="{poll["id"].decode()}";')
-    return {u.get('username') for u in res} - usernames
+    return {u.get("username") for u in res} - usernames

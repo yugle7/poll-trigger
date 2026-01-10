@@ -1,12 +1,12 @@
 import ydb
 import ydb.iam
 
-from cityhash import CityHash64
 
 import os
 import json
 
 import dotenv
+from utils import get_cron
 
 dotenv.load_dotenv()
 
@@ -38,7 +38,7 @@ def execute(yql):
     return pool.retry_operation_sync(wrapper)
 
 
-def read_data(user_id):
+def load_data(user_id):
     forms = execute(f"SELECT form FROM forms WHERE user_id={user_id};")
     chats = execute(f"SELECT chat FROM chats WHERE user_id={user_id};")
 
@@ -46,3 +46,20 @@ def read_data(user_id):
         "forms": [json.loads(q.get("form")) for q in forms],
         "chats": [json.loads(q.get("chat")) for q in chats],
     }
+
+
+def save_data(user_id, forms):
+    execute(f"DELETE FROM forms WHERE user_id={user_id};")
+
+    values = ",".join(f"({user_id}, '{json.dumps(form)}')" for form in forms)
+    execute(f"INSERT INTO forms (user_id, form) VALUES {values};")
+
+    crons = [get_cron(form) for form in forms]
+    values = ",".join(
+        f"({user_id}, {cron['group_id']}, {cron['thread_id']}, '{json.dumps(cron['poll'])}', {cron['create']}, {cron['notify']}, '{json.dumps(cron['triggers'])}')"
+        for cron in crons
+    )
+    execute(f"DELETE FROM crons WHERE user_id={user_id};")
+    execute(
+        f"INSERT INTO crons (user_id, group_id, thread_id, poll, create, notify, triggers) VALUES {values};"
+    )

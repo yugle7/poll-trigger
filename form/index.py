@@ -2,7 +2,7 @@ import os
 import db
 import hmac
 import hashlib
-from time import time
+import json
 
 import dotenv
 
@@ -29,4 +29,10 @@ def handler(event, context):
     #     return {'statusCode': 200, 'body': []}
 
     user_id = params["user_id"]
-    return {"statusCode": 200, "body": db.read_data(user_id)}
+    if "forms" in params:
+        forms = json.loads(params["forms"])
+        result = db.save_data(user_id, forms)
+    else:
+        result = db.load_data(user_id)
+
+    return {"statusCode": 200, "body": result}

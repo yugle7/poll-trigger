@@ -30,6 +30,20 @@ const SECTION = document.getElementById("section");
 
 let data = {};
 
+function addOptions(form, chat = null) {
+  const options = form.querySelector('select[name="chat"]');
+  data.chats.forEach((c) => {
+    const option = document.createElement("option");
+    option.value = c["group_id"] + " " + c["thread_id"];
+    option.textContent = c["thread"] || c["group"];
+
+    if (option.value === chat) {
+      option.selected = true;
+    }
+    options.appendChild(option);
+  });
+}
+
 (async function () {
   const res = await fetch(url);
   if (!res.ok) {
@@ -40,16 +54,7 @@ let data = {};
   data.forms.forEach((f) => {
     const form = FORM.content.cloneNode(true).firstElementChild;
 
-    const options = form.querySelector('select[name="chat"]');
-    data.chats.forEach((c, i) => {
-      const option = document.createElement("option");
-      option.value = i;
-      option.textContent = c["thread"] || c["group"];
-      if (i === f.chat) {
-        option.selected = true;
-      }
-      options.appendChild(option);
-    });
+    addOptions(form, f.chat);
 
     const what = form.querySelector('input[name="what"]');
     what.value = f.what;
@@ -77,14 +82,7 @@ let data = {};
   });
 
   const form = FORM.content.cloneNode(true).firstElementChild;
-
-  const options = form.querySelector('select[name="chat"]');
-  data.chats.forEach((c, i) => {
-    const option = document.createElement("option");
-    option.value = i;
-    option.textContent = c["thread"] || c["group"];
-    options.appendChild(option);
-  });
+  addOptions(form);
 
   const what = form.querySelector('input[name="what"]');
   what.onclick = addForm;
@@ -120,14 +118,7 @@ function addForm(e) {
   e.target.parentElement.lastElementChild.onclick = delForm;
 
   const form = FORM.content.cloneNode(true).firstElementChild;
-
-  const options = form.querySelector('select[name="chat"]');
-  data.chats.forEach((c, i) => {
-    const option = document.createElement("option");
-    option.value = i;
-    option.textContent = c["thread"] || c["group"];
-    options.appendChild(option);
-  });
+  addOptions(form);
 
   const input = form.querySelector('input[name="what"]');
   input.onclick = addForm;

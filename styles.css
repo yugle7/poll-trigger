@@ -10,12 +10,6 @@
   box-sizing: border-box;
 }
 
-/* * {
-  --bg-color: rgb(33, 33, 33);
-  --acent-color: rgb(135, 116, 225);
-  --text-color: rgb(200, 200, 200);
-} */
-
 body {
   font-family: "Roboto", "Helvetica", system-ui, sans-serif;
   font-style: normal;
@@ -70,7 +64,7 @@ p {
 
 .button {
   padding: 10px;
-  border-radius: 8px;
+  border-radius: 10px;
   font-size: 20px;
 }
 
@@ -95,7 +89,7 @@ input,
 select {
   width: 100%;
   padding: 15px;
-  border: 1px solid var(--hint-color);
+  border: 1px solid var(--line-color);
   border-radius: 15px;
   color: var(--text-color);
   font-size: 16px;

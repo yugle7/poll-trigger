@@ -105,7 +105,7 @@ select {
 
 input:hover,
 input:focus {
-  border: 1px solid var(--acent-color);
+  border: 0.5px solid var(--acent-color);
 }
 
 input[type="number"] {

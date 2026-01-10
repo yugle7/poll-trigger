@@ -29,6 +29,12 @@ def get_random_id():
     return uuid4().int % (1 << 64)
 
 
+def get_form(form):
+    form["id"] = int(form["id"]) if form["id"] else get_random_id()
+    form["time_zone"] = int(form["time_zone"])
+    return form
+
+
 def get_cron(form):
     if " " in form["chat"]:
         group_id, thread_id = map(int, form["chat"].split())
@@ -40,10 +46,8 @@ def get_cron(form):
     create = get_trigger(form["create"])
     notify = get_trigger(form["notify"])
 
-    time_zone = int(form["time_zone"])
-
     return {
-        "id": int(form["id"]) if form["id"] else get_random_id(),
+        "id": form["id"],
         "group_id": group_id,
         "thread_id": thread_id,
         "poll": {
@@ -52,8 +56,8 @@ def get_cron(form):
             "is_anonymous": False,
             "allows_multiple_answers": False,
         },
-        "create": get_when(create, time_zone),
-        "notify": get_when(notify, time_zone),
+        "create": get_when(create, form["time_zone"]),
+        "notify": get_when(notify, form["time_zone"]),
         "triggers": {"create": create, "notify": notify, "start": start},
-        "time_zone": time_zone,
+        "time_zone": form["time_zone"],
     }

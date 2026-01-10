@@ -6,7 +6,7 @@ import os
 import json
 
 import dotenv
-from utils import get_cron
+from utils import get_cron, get_form
 
 dotenv.load_dotenv()
 
@@ -49,17 +49,18 @@ def load_data(user_id):
 
 
 def save_data(user_id, forms):
-    execute(f"DELETE FROM forms WHERE user_id={user_id};")
+    forms = [get_form(form) for form in forms]
 
     values = ",".join(f"({user_id}, '{json.dumps(form)}')" for form in forms)
+    execute(f"DELETE FROM forms WHERE user_id={user_id};")
     execute(f"INSERT INTO forms (user_id, form) VALUES {values};")
 
     crons = [get_cron(form) for form in forms]
     values = ",".join(
-        f"({user_id}, {cron['group_id']}, {cron['thread_id']}, '{json.dumps(cron['poll'])}', {cron['create']}, {cron['notify']}, '{json.dumps(cron['triggers'])}')"
+        f"({cron['id']}, {user_id}, {cron['group_id']}, {cron['thread_id']}, '{json.dumps(cron['poll'])}', {cron['create']}, {cron['notify']}, '{json.dumps(cron['triggers'])}')"
         for cron in crons
     )
     execute(f"DELETE FROM crons WHERE user_id={user_id};")
     execute(
-        f"INSERT INTO crons (user_id, group_id, thread_id, poll, create, notify, triggers) VALUES {values};"
+        f"INSERT INTO crons (id, user_id, group_id, thread_id, poll, create, notify, triggers) VALUES {values};"
     )

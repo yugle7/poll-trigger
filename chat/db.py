@@ -1,14 +1,10 @@
 import ydb.iam
 
 import os
-
+import json
 import dotenv
 
 from cityhash import CityHash64
-
-
-def get_id(a, b):
-    return CityHash64(str(a) + " " + str(b).lower().strip())
 
 
 dotenv.load_dotenv()
@@ -16,8 +12,8 @@ dotenv.load_dotenv()
 driver = ydb.Driver(
     endpoint=os.getenv("YDB_ENDPOINT"),
     database=os.getenv("YDB_DATABASE"),
-    credentials=ydb.AuthTokenCredentials(os.getenv("IAM_TOKEN")),
-    # credentials=ydb.iam.MetadataUrlCredentials()
+    # credentials=ydb.AuthTokenCredentials(os.getenv("IAM_TOKEN")),
+    credentials=ydb.iam.MetadataUrlCredentials(),
 )
 
 driver.wait(fail_fast=True, timeout=10)
@@ -42,7 +38,7 @@ def execute(yql):
 
 
 def add_vote(poll_id, user_id, username, votes):
-    id = get_id(poll_id, user_id)
+    id = CityHash64(f"{poll_id} {user_id}")
     if votes:
         vote = sum(1 << v for v in votes)
         execute(
@@ -50,3 +46,25 @@ def add_vote(poll_id, user_id, username, votes):
         )
     else:
         execute(f"DELETE FROM votes WHERE id={id};")
+
+
+def add_chat(user_id, group_id, group, thread_id, thread):
+    id = CityHash64(f"{user_id} {group_id} {thread_id}")
+    chat = {
+        "group_id": group_id,
+        "group": group,
+        "thread_id": thread_id,
+        "thread": thread,
+    }
+    execute(
+        f"INSERT INTO chats (id, user_id, chat) VALUES ({id}, {user_id}, '{json.dumps(chat)}');"
+    )
+
+
+def get_user(id):
+    res = execute(f"SELECT * FROM users WHERE id={id};")
+    return res and res[0]
+
+
+def create_user(id):
+    return execute(f"INSERT INTO users (id, time_zone) VALUES ({id}, 3) RETURNING id;")

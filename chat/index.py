@@ -1,28 +1,77 @@
 import json
 
 import db
+import tg
+
+
+def handle(body):
+    answer = body.get("poll_answer")
+
+    if answer:
+        poll_id = answer["poll_id"]
+        votes = answer["option_ids"]
+
+        user_id = answer["user"]["id"]
+        username = answer["user"].get("username", user_id)
+
+        db.add_vote(poll_id, user_id, username, votes)
+        return "проголосовал"
+
+    message = body.get("message")
+    if not message:
+        return "нет сообщения"
+
+    user_id = message["from"]["id"]
+    chat_id = message["chat"]["id"]
+
+    text = message.get("text")
+
+    if chat_id != user_id:
+        group_id = chat_id
+
+        if not text or "@" not in text:
+            return "не ко мне"
+
+        if not tg.is_admin(user_id, group_id):
+            return "не админ"
+
+        thread_id = message.get("message_thread_id")
+
+        if not db.get_user(user_id):
+            tg.show_message(
+                group_id, thread_id, "Сначала заведите личную переписку со мной"
+            )
+            return "не узнал"
+
+        group = message["chat"]["title"]
+        reply = message.get("reply_to_message")
+        if thread_id and reply:
+            thread = reply["forum_topic_created"]["name"]
+        else:
+            thread = None
+
+        db.add_chat(user_id, group_id, group, thread_id, thread)
+        return "добавлен"
+
+    elif text == "/start":
+        if db.create_user(user_id):
+            answer = "Отлично! Рад вас видеть!\n\nЧтобы создавать здесь опросы для вашей группы, добавьте меня в ту группу и свяжите меня с ней, отправив туда команду /start"
+        else:
+            answer = "Привет! Отправьте команду /start в той группе, где вы собираетесь создавать опросы"
+
+        tg.send_message(user_id, answer)
+        return "старт"
+
+    return "тоже успех"
 
 
 def handler(event, context=None):
     body = json.loads(event["body"])
 
-    answer = body.get("poll_answer")
+    try:
+        return {"statusCode": 200, "body": handle(body)}
 
-    if not answer:
-        result = "not"
-    else:
-        try:
-            poll_id = answer["poll_id"]
-            votes = answer["option_ids"]
+    except Exception as e:
+        print(e)
 
-            user_id = answer["user"]["id"]
-            username = answer["user"].get("username", user_id)
-
-            db.add_vote(poll_id, user_id, username, votes)
-            result = "ok"
-
-        except Exception as err:
-            print(err)
-            result = "fail"
-
-    return {"statusCode": 200, "body": result}
+    return {"statusCode": 200, "body": "fail"}

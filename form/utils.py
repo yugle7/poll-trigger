@@ -26,11 +26,11 @@ def get_when(trigger, time_zone):
 
 
 def get_random_id():
-    return uuid4().int % (1 << 64)
+    return str(uuid4().int % (1 << 64))
 
 
 def get_form(form):
-    form["id"] = int(form["id"]) if form["id"] else get_random_id()
+    form["id"] = form.get("id", get_random_id())
     form["time_zone"] = int(form["time_zone"])
     return form
 
@@ -47,7 +47,7 @@ def get_cron(form):
     notify = get_trigger(form["notify"])
 
     return {
-        "id": form["id"],
+        "id": int(form["id"]),
         "group_id": group_id,
         "thread_id": thread_id,
         "poll": {

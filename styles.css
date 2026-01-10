@@ -108,6 +108,12 @@ input:focus {
   border: 1px solid var(--acent-color);
 }
 
+input[type="number"] {
+  appearance: textfield;
+  -webkit-appearance: textfield;
+  -moz-appearance: textfield;
+}
+
 section input:placeholder-shown + label {
   display: none;
 }

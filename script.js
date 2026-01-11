@@ -80,7 +80,6 @@ function addOptions(form, chat = null) {
     section.firstElementChild.onclick = addWho;
     sections.appendChild(section);
 
-    forms.appendChild(document.createElement("hr"));
     forms.appendChild(form);
   });
 
@@ -95,7 +94,6 @@ function addOptions(form, chat = null) {
   section.firstElementChild.onclick = addWho;
   sections.appendChild(section);
 
-  forms.appendChild(document.createElement("hr"));
   forms.appendChild(form);
 })();
 
@@ -132,7 +130,6 @@ function addForm(e) {
   section.firstElementChild.onclick = addWho;
   sections.appendChild(section);
 
-  forms.appendChild(document.createElement("hr"));
   forms.appendChild(form);
 }
 

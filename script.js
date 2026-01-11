@@ -139,7 +139,6 @@ function addForm(e) {
 function delForm(e) {
   e.preventDefault();
   const form = e.target.parentElement.parentElement;
-  form.nextElementSibling.remove();
   form.remove();
 }
 

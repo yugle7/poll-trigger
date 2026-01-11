@@ -48,7 +48,7 @@ def add_vote(poll_id, user_id, username, votes):
         execute(f"DELETE FROM votes WHERE id={id};")
 
 
-def add_chat(user_id, group_id, group, thread_id, thread):
+def attach_chat(user_id, group_id, group, thread_id, thread):
     id = CityHash64(f"{user_id} {group_id} {thread_id}")
     chat = {
         "group_id": group_id,
@@ -59,6 +59,11 @@ def add_chat(user_id, group_id, group, thread_id, thread):
     execute(
         f"INSERT INTO chats (id, user_id, chat) VALUES ({id}, {user_id}, '{json.dumps(chat)}');"
     )
+
+
+def detach_chat(user_id, group_id, thread_id):
+    id = CityHash64(f"{user_id} {group_id} {thread_id}")
+    execute(f"DELETE FROM chats WHERE id={id});")
 
 
 def get_user(id):

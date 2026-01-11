@@ -50,14 +50,21 @@ def handle(body):
         else:
             thread = None
 
-        db.add_chat(user_id, group_id, group, thread_id, thread)
-        return "добавлен"
+        if "attach" in text:
+            db.attach_chat(user_id, group_id, group, thread_id, thread)
+            return "связал"
+
+        if "detach" in text:
+            db.detach_chat(user_id, group_id)
+            return "отвязал"
+
+        return "не понял"
 
     elif text == "/start":
         if db.create_user(user_id):
-            answer = "Отлично! Рад вас видеть!\n\nЧтобы создавать здесь опросы для вашей группы, добавьте меня в ту группу и свяжите меня с ней, отправив туда команду /start"
+            answer = "Отлично! Рад вас видеть!\n\nЧтобы создавать здесь опросы для вашего чата, добавьте меня в тот чат и свяжите меня с ним, отправив туда команду /attach"
         else:
-            answer = "Привет! Отправьте команду /start в той группе, где вы собираетесь создавать опросы"
+            answer = "Привет! Отправьте команду /attach в тот чат, где вы собираетесь создавать опросы"
 
         tg.send_message(user_id, answer)
         return "старт"

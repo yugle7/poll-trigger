@@ -17,7 +17,7 @@ body {
   font-size: 28px;
   line-height: 1.5;
   word-spacing: 3px;
-  background-color: var(--bg-color);
+  background-color: var(--acent-color);
   color: var(--text-color);
   color-scheme: var(--tg-color-scheme, "dark");
 }

@@ -71,7 +71,7 @@ section label {
   position: absolute;
   top: -8px;
   left: 12px;
-  background: var(--bg-color);
+  background: var(--form-color);
   padding: 0 4px;
   font-size: 12px;
   color: var(--acent-color);
@@ -87,7 +87,7 @@ select {
   border-radius: 10px;
   color: var(--text-color);
   font-size: 16px;
-  background-color: var(--bg-color);
+  background-color: var(--form-color);
   outline: none;
   vertical-align: middle;
 }
@@ -134,7 +134,7 @@ section input:placeholder-shown + label {
 }
 
 .delete:hover {
-  background-color: var(--bg-color);
+  background-color: var(--form-color);
 }
 
 .who > :last-child .delete,
@@ -142,11 +142,17 @@ section input:placeholder-shown + label {
   display: none;
 }
 
+#forms {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
 form {
   max-width: 400px;
   margin: 0 auto;
   padding: 15px;
-  box-shadow: 0 4px 6px (0, 0, 0, 0.1);
+  background-color: var(--form-color);
 }
 
 select {

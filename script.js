@@ -60,7 +60,7 @@ function addOptions(form, chat = null) {
     what.value = f.what;
     what.parentElement.lastElementChild.onclick = delForm;
 
-    form.querySelector('input[name="id"]').value = f.id.toString();
+    form.querySelector('input[name="id"]').value = f.id;
     form.querySelector('input[name="time_zone"]').value = f.time_zone;
 
     form.querySelector('input[name="where"]').value = f.where || "";
@@ -162,4 +162,6 @@ Telegram.WebApp.MainButton.onClick(async () => {
 
   url.searchParams.set("forms", JSON.stringify(data));
   await fetch(url);
+
+  Telegram.WebApp.close();
 });

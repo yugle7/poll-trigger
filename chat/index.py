@@ -3,6 +3,8 @@ import json
 import db
 import tg
 
+BOT_NAME = "polltriggerbot"
+
 
 def handle(body):
     answer = body.get("poll_answer")
@@ -29,7 +31,10 @@ def handle(body):
     if chat_id != user_id:
         group_id = chat_id
 
-        if not text or "@" not in text:
+        if not text or not text.startswith("/"):
+            return "не команда"
+
+        if "@" in text and text.endswith("@polltriggerbot"):
             return "не ко мне"
 
         if not tg.is_admin(user_id, group_id):
@@ -41,7 +46,7 @@ def handle(body):
             tg.show_message(
                 group_id, thread_id, "Сначала заведите личную переписку со мной"
             )
-            return "не узнал"
+            return "нет чата со мной"
 
         group = message["chat"]["title"]
         reply = message.get("reply_to_message")
@@ -50,11 +55,11 @@ def handle(body):
         else:
             thread = None
 
-        if "attach" in text:
+        if "/attach" in text:
             db.attach_chat(user_id, group_id, group, thread_id, thread)
             return "связал"
 
-        if "detach" in text:
+        if "/detach" in text:
             db.detach_chat(user_id, group_id, thread_id)
             return "отвязал"
 

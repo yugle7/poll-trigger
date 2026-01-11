@@ -31,20 +31,21 @@ WEEKDAYS = {
 
 def get_trigger(when):
     words = when.lower().replace(":", " ").split()
-    weekday = -1
+    trigger = {}
 
     for word in words:
         if word in WEEKDAYS:
-            weekday = WEEKDAYS[word]
+            trigger["weekday"] = WEEKDAYS[word]
             break
 
     for word in words:
         if word.isdigit():
             hour = int(word)
             if 0 <= hour <= 23:
+                trigger["hour"] = hour
                 break
 
-    return {"hour": hour, "weekday": weekday}
+    return trigger
 
 
 def get_when(trigger, time_zone):
@@ -52,12 +53,14 @@ def get_when(trigger, time_zone):
     now = datetime.now() + time_zone
     t = now.replace(hour=trigger["hour"], minute=0, second=0, microsecond=0)
 
-    if trigger["weekday"] != -1:
+    if "weekday" in trigger:
         days = (trigger["weekday"] - t.weekday()) % 7
         if days:
             t += timedelta(days=days)
         elif t <= now:
             t += timedelta(days=7)
+    elif t <= now:
+        t += timedelta(days=1)
 
     return int((t - time_zone).timestamp())
 
@@ -67,23 +70,23 @@ def get_random_id():
 
 
 def get_form(form):
-    form["id"] = form.get("id", get_random_id())
+    form["id"] = form.get("id") or get_random_id()
     form["time_zone"] = int(form["time_zone"])
     return form
 
 
 def get_cron(form):
-    if " " in form["chat"]:
-        group_id, thread_id = map(int, form["chat"].split())
-    else:
-        group_id = int(form["chat"])
-        thread_id = "NULL"
+    group_id, thread_id = form["chat"].split()
+    group_id = int(group_id)
+    thread_id = "NULL" if thread_id == "null" else int(thread_id)
 
     start = get_trigger(form["start"])
     create = get_trigger(form["create"])
     notify = get_trigger(form["notify"])
 
-    question = ", ".join(q for q in [form["what"], form["start"], form["where"]] if q)
+    question = ", ".join(
+        q.strip() for q in [form["what"], form["start"], form["where"]] if q
+    )
 
     return {
         "id": int(form["id"]),

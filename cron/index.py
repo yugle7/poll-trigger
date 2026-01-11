@@ -6,7 +6,10 @@ import tg
 
 def create_poll(cron):
     poll = cron["poll"]
-    poll["question"] += " — " + get_start_date(cron)
+    start = get_start_date(cron)
+    if start:
+        poll["question"] += " — " + get_start_date(cron)
+
     res = tg.create_poll(cron["group_id"], cron["thread_id"], poll)
     if res:
         db.add_poll(

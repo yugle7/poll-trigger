@@ -113,6 +113,7 @@ section input:placeholder-shown + label {
   display: none;
 }
 
+.tooltip,
 .delete {
   position: absolute;
   right: 8px;
@@ -129,12 +130,11 @@ section input:placeholder-shown + label {
 
   background: none;
   border: none;
-  border-radius: 50%;
   cursor: pointer;
 }
 
 .delete:hover {
-  background-color: var(--form-color);
+  opacity: 1;
 }
 
 .who > :last-child .delete,
@@ -156,17 +156,18 @@ form {
   background-color: var(--form-color);
 }
 
-section > span {
-  display: block;
-  font-size: 14px;
-  line-height: 1rem;
-  color: var(--line-color);
-}
-
 select {
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
+}
+
+section > span {
+  display: none;
+}
+
+.tooltip {
+  display: none;
 }
 
 /* .checkbox {

@@ -142,6 +142,10 @@ section input:placeholder-shown + label {
   display: none;
 }
 
+#forms {
+  padding-top: 20px;
+}
+
 form {
   max-width: 400px;
   margin: 0 auto;

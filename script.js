@@ -80,8 +80,8 @@ function addOptions(form, chat = null) {
     section.firstElementChild.onclick = addWho;
     sections.appendChild(section);
 
-    forms.appendChild(form);
     forms.appendChild(document.createElement("hr"));
+    forms.appendChild(form);
   });
 
   const form = FORM.content.cloneNode(true).firstElementChild;
@@ -95,6 +95,7 @@ function addOptions(form, chat = null) {
   section.firstElementChild.onclick = addWho;
   sections.appendChild(section);
 
+  forms.appendChild(document.createElement("hr"));
   forms.appendChild(form);
 })();
 

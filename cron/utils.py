@@ -34,6 +34,9 @@ def get_start_date(cron):
 
 
 def get_when(trigger, time_zone):
+    if "hour" not in trigger:
+        return 0
+
     time_zone = timedelta(hours=time_zone)
     now = datetime.now() + time_zone
     t = now.replace(hour=trigger["hour"], minute=0, second=0, microsecond=0)

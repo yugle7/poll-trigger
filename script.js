@@ -15,7 +15,7 @@ let checkDataString = Array.from(params.entries())
 
 let url = new URL("https://functions.yandexcloud.net/d4ee4tfflc942eo83k74");
 
-// user = { id:  };
+// user = { id: 164671585 };
 // hash = "";
 // checkDataString = "";
 

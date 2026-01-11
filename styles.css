@@ -156,6 +156,13 @@ form {
   background-color: var(--form-color);
 }
 
+section > span {
+  display: block;
+  font-size: 14px;
+  line-height: 1rem;
+  color: var(--line-color);
+}
+
 select {
   -webkit-appearance: none;
   -moz-appearance: none;

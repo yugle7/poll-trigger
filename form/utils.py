@@ -49,6 +49,9 @@ def get_trigger(when):
 
 
 def get_when(trigger, time_zone):
+    if "hour" not in trigger:
+        return 0
+
     time_zone = timedelta(hours=time_zone)
     now = datetime.now() + time_zone
     t = now.replace(hour=trigger["hour"], minute=0, second=0, microsecond=0)
@@ -99,7 +102,7 @@ def get_cron(form):
             "allows_multiple_answers": False,
         },
         "create": get_when(create, form["time_zone"]),
-        "notify": get_when(notify, form["time_zone"]),
+        "notify": get_when(notify, form["time_zone"]) if "hour" in create else 0,
         "triggers": {"create": create, "notify": notify, "start": start},
         "time_zone": form["time_zone"],
     }

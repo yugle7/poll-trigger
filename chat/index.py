@@ -55,7 +55,7 @@ def handle(body):
             return "связал"
 
         if "detach" in text:
-            db.detach_chat(user_id, group_id)
+            db.detach_chat(user_id, group_id, thread_id)
             return "отвязал"
 
         return "не понял"

@@ -1,13 +1,49 @@
 from datetime import datetime, timedelta
 from uuid import uuid4
 
-WEEKDAYS = ["пн", "вт", "ср", "чт", "пт", "сб", "вс"]
+WEEKDAYS = {
+    "пн": 0,
+    "понедельник": 0,
+    "понедельникам": 0,
+    "вт": 1,
+    "вторник": 1,
+    "вторникам": 1,
+    "ср": 2,
+    "среда": 2,
+    "средам": 2,
+    "среду": 2,
+    "чт": 3,
+    "четверг": 3,
+    "четвергам": 3,
+    "пт": 4,
+    "пятница": 4,
+    "пятницам": 4,
+    "пятницу": 4,
+    "сб": 5,
+    "суббота": 5,
+    "субботу": 5,
+    "субботам": 5,
+    "вс": 6,
+    "воскресенье": 6,
+    "воскресеньям": 6,
+}
 
 
 def get_trigger(when):
-    weekday, hour = when.lower().split()
-    hour = int(hour.split(":")[0])
-    weekday = WEEKDAYS.index(weekday)
+    words = when.lower().replace(":", " ").split()
+    weekday = -1
+
+    for word in words:
+        if word in WEEKDAYS:
+            weekday = WEEKDAYS[word]
+            break
+
+    for word in words:
+        if word.isdigit():
+            hour = int(word)
+            if 0 <= hour <= 23:
+                break
+
     return {"hour": hour, "weekday": weekday}
 
 
@@ -16,11 +52,12 @@ def get_when(trigger, time_zone):
     now = datetime.now() + time_zone
     t = now.replace(hour=trigger["hour"], minute=0, second=0, microsecond=0)
 
-    days = (trigger["weekday"] - t.weekday()) % 7
-    if days:
-        t += timedelta(days=days)
-    elif t <= now:
-        t += timedelta(days=7)
+    if trigger["weekday"] != -1:
+        days = (trigger["weekday"] - t.weekday()) % 7
+        if days:
+            t += timedelta(days=days)
+        elif t <= now:
+            t += timedelta(days=7)
 
     return int((t - time_zone).timestamp())
 

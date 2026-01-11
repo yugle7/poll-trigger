@@ -29,10 +29,10 @@ def handler(event, context):
     #     return {'statusCode': 200, 'body': []}
 
     user_id = params["user_id"]
+
     if "forms" in params:
         forms = json.loads(params["forms"])
-        result = db.save_data(user_id, forms)
-    else:
-        result = db.load_data(user_id)
+        db.save_data(user_id, forms)
+        return {"statusCode": 200, "body": "ok"}
 
-    return {"statusCode": 200, "body": result}
+    return {"statusCode": 200, "body": db.load_data(user_id)}

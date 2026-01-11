@@ -134,7 +134,7 @@ section input:placeholder-shown + label {
 }
 
 .delete:hover {
-  background-color: var(--line-color);
+  background-color: var(--bg-color);
 }
 
 .who > :last-child .delete,
@@ -146,20 +146,13 @@ form {
   max-width: 400px;
   margin: 0 auto;
   padding: 15px;
+  box-shadow: 0 4px 6px (0, 0, 0, 0.1);
 }
 
 select {
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
-}
-
-hr {
-  height: 1px;
-  background-color: var(--acent-color);
-  opacity: 0.5;
-  border: none;
-  margin: 50px 10px 10px 10px;
 }
 
 /* .checkbox {

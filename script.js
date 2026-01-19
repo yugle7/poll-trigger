@@ -67,7 +67,7 @@ function addOptions(form, chat = null) {
     form.querySelector('input[name="start"]').value = f.start || "";
     form.querySelector('input[name="create"]').value = f.create || "";
     form.querySelector('input[name="notify"]').value = f.notify || "";
-    form.querySelector('input[name="stop"]').value = f.stop || false;
+    form.querySelector('input[name="stop"]').checked = f.stop;
 
     const sections = form.querySelector(".who");
     f.who.forEach((w) => {

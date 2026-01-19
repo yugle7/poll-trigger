@@ -105,7 +105,8 @@ section input:placeholder-shown + label {
 }
 
 .who > :last-child .delete,
-#forms > :last-child label ~ .delete {
+#forms > :last-child label ~ .delete,
+#forms > :last-child .stop {
   display: none;
 }
 

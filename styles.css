@@ -147,3 +147,49 @@ p {
   background-color: var(--form-color);
   padding: 15px;
 }
+
+input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.stop {
+  display: inline-block;
+  color: var(--line-color);
+  cursor: pointer;
+  user-select: none;
+  text-align: right;
+  width: 100%;
+  font-size: 16px;
+}
+
+.stop:hover {
+  color: var(--acent-color);
+}
+
+form {
+  transition: opacity 0.3s ease;
+}
+
+form:has(input[type="checkbox"]:checked) {
+  opacity: 0.9;
+}
+
+.stop:hover > .text::before {
+  content: "остановить";
+}
+
+.text::before {
+  content: "запущен";
+}
+
+input[type="checkbox"]:checked + .text::before {
+  content: "остановлен";
+}
+
+.stop:hover > input[type="checkbox"]:checked + .text::before {
+  content: "запустить";
+}

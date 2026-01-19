@@ -63,7 +63,7 @@ def attach_chat(user_id, group_id, group, thread_id, thread):
 
 def detach_chat(user_id, group_id, thread_id):
     id = CityHash64(f"{user_id} {group_id} {thread_id}")
-    execute(f"DELETE FROM chats WHERE id={id});")
+    execute(f"DELETE FROM chats WHERE id={id};")
 
 
 def get_user(id):

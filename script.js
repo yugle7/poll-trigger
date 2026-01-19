@@ -15,9 +15,9 @@ let checkDataString = Array.from(params.entries())
 
 let url = new URL("https://functions.yandexcloud.net/d4ee4tfflc942eo83k74");
 
-// user = { id: 164671585 };
-// hash = "";
-// checkDataString = "";
+user = { id: 164671585 };
+hash = "";
+checkDataString = "";
 
 url.searchParams.set("user_id", user["id"]);
 url.searchParams.set("hash", hash);
@@ -29,13 +29,6 @@ const FORM = document.getElementById("form");
 const SECTION = document.getElementById("section");
 
 let data = {};
-
-function showTooltip(e) {
-  e.preventDefault();
-  display = e.target.previousElementSibling.style.display;
-  e.target.previousElementSibling.style.display =
-    display === "block" ? "none" : "block";
-}
 
 function addOptions(form, chat = null) {
   const options = form.querySelector('select[name="chat"]');
@@ -74,6 +67,7 @@ function addOptions(form, chat = null) {
     form.querySelector('input[name="start"]').value = f.start || "";
     form.querySelector('input[name="create"]').value = f.create || "";
     form.querySelector('input[name="notify"]').value = f.notify || "";
+    form.querySelector('input[name="stop"]').value = f.stop;
 
     const sections = form.querySelector(".who");
     f.who.forEach((w) => {

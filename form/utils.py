@@ -87,6 +87,10 @@ def get_cron(form):
     create = get_trigger(form["create"])
     notify = get_trigger(form["notify"])
 
+    if "hour" not in create:
+        notify.pop("hour")
+    stop = form.get("stop")
+
     question = ", ".join(
         q.strip() for q in [form["what"], form["start"], form["where"]] if q
     )
@@ -101,8 +105,8 @@ def get_cron(form):
             "is_anonymous": False,
             "allows_multiple_answers": False,
         },
-        "create": get_when(create, form["time_zone"]),
-        "notify": get_when(notify, form["time_zone"]) if "hour" in create else 0,
+        "create": 0 if stop else get_when(create, form["time_zone"]),
+        "notify": 0 if stop else get_when(notify, form["time_zone"]),
         "triggers": {"create": create, "notify": notify, "start": start},
         "time_zone": form["time_zone"],
     }

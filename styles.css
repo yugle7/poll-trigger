@@ -170,7 +170,7 @@ form:has(input[name="stop"]:checked) {
   justify-content: space-between;
   font-size: 16px;
   opacity: 0.5;
-  padding: 0 5px;
+  padding: 0 15px;
 }
 
 .text::before {

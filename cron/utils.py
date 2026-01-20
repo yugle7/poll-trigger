@@ -16,18 +16,28 @@ MONTHS = [
 ]
 
 
+def safe(func):
+    def wrapper(*args):
+        try:
+            return func(*args)
+        except Exception as e:
+            print(f"{func.__name__}: {e}")
+            return None
+
+    return wrapper
+
+
+@safe
 def get_start_date(cron):
     trigger = cron["triggers"]["start"]
-    if not trigger:
-        return ""
-
-    now = datetime.now() + timedelta(hours=cron["time_zone"])
-    start = now.replace(hour=trigger["hour"], minute=0, second=0, microsecond=0)
+    start = datetime.now() + timedelta(hours=cron["time_zone"])
 
     if "weekday" in trigger:
         days = (trigger["weekday"] - start.weekday()) % 7
         start += timedelta(days=days)
-    elif trigger["hour"] <= now.hour:
+    elif "hour" not in trigger:
+        return ""
+    elif trigger["hour"] <= start.hour:
         start += timedelta(days=1)
 
     return f"{start.day} {MONTHS[start.month - 1]}"

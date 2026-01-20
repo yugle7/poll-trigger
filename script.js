@@ -56,10 +56,7 @@ function addOptions(form, chat = null) {
 
     addOptions(form, f.chat);
 
-    const what = form.querySelector('input[name="what"]');
-    what.value = f.what;
-    what.parentElement.lastElementChild.onclick = delForm;
-
+    form.querySelector('input[name="what"]').value = f.what;
     form.querySelector('input[name="id"]').value = f.id;
     form.querySelector('input[name="time_zone"]').value = f.time_zone;
 
@@ -68,6 +65,8 @@ function addOptions(form, chat = null) {
     form.querySelector('input[name="create"]').value = f.create || "";
     form.querySelector('input[name="notify"]').value = f.notify || "";
     form.querySelector('input[name="stop"]').checked = f.stop;
+
+    form.lastElementChild.lastElementChild.onclick = delForm;
 
     const sections = form.querySelector(".who");
     f.who.forEach((w) => {
@@ -86,9 +85,7 @@ function addOptions(form, chat = null) {
 
   const form = FORM.content.cloneNode(true).firstElementChild;
   addOptions(form);
-
-  const what = form.querySelector('input[name="what"]');
-  what.onclick = addForm;
+  form.onclick = addForm;
 
   const sections = form.querySelector(".who");
   const section = SECTION.content.cloneNode(true).firstElementChild;
@@ -117,14 +114,14 @@ function delWho(e) {
 
 function addForm(e) {
   e.preventDefault();
-  e.target.onclick = null;
-  e.target.parentElement.lastElementChild.onclick = delForm;
+
+  const f = e.target.closest("form");
+  f.onclick = null;
+  f.lastElementChild.lastElementChild.onclick = delForm;
 
   const form = FORM.content.cloneNode(true).firstElementChild;
   addOptions(form);
-
-  const input = form.querySelector('input[name="what"]');
-  input.onclick = addForm;
+  form.onclick = addForm;
 
   const sections = form.querySelector(".who");
   const section = SECTION.content.cloneNode(true).firstElementChild;

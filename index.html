@@ -28,7 +28,9 @@
       <form>
         <input type="text" name="id" hidden />
         <section>
-          <select name="chat" required></select>
+          <select name="chat" required placeholder="x">
+            <option value="">Не выбран</option>
+          </select>
           <label for="chat">Чат</label>
         </section>
         <section>
@@ -42,9 +44,8 @@
           <label for="time_zone">Часовой пояс</label>
         </section>
         <section>
-          <input type="text" name="what" required placeholder="Что" />
+          <input type="text" name="what" placeholder="Что" />
           <label for="what">Что</label>
-          <button type="button" class="delete">×</button>
         </section>
         <section>
           <input type="text" name="where" placeholder="Где" />
@@ -66,10 +67,14 @@
         </section>
 
         <div class="who"></div>
-        <label class="stop">
-          <input type="checkbox" name="stop" />
-          <span class="text"></span>
-        </label>
+
+        <div class="buttons">
+          <label>
+            <input type="checkbox" name="stop" />
+            <span class="text"></span>
+          </label>
+          <button type="button">Удалить</button>
+        </div>
       </form>
     </template>
 

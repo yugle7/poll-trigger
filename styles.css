@@ -106,7 +106,7 @@ section input:placeholder-shown + label {
 
 .who > :last-child .delete,
 #forms > :last-child label ~ .delete,
-#forms > :last-child .stop {
+#forms > :last-child .buttons {
   display: none;
 }
 
@@ -149,7 +149,11 @@ p {
   padding: 15px;
 }
 
-input[type="checkbox"] {
+form {
+  transition: opacity 0.3s ease;
+}
+
+input[name="stop"] {
   position: absolute;
   opacity: 0;
   width: 1px;
@@ -157,40 +161,33 @@ input[type="checkbox"] {
   overflow: hidden;
 }
 
-.stop {
-  display: inline-block;
-  color: var(--line-color);
-  cursor: pointer;
-  user-select: none;
-  text-align: right;
-  width: 100%;
-  font-size: 16px;
-}
-
-.stop:hover {
-  color: var(--acent-color);
-}
-
-form {
-  transition: opacity 0.3s ease;
-}
-
-form:has(input[type="checkbox"]:checked) {
+form:has(input[name="stop"]:checked) {
   opacity: 0.9;
 }
 
-.stop:hover > .text::before {
-  content: "остановить";
+.buttons {
+  display: flex;
+  justify-content: space-between;
+  font-size: 16px;
+  opacity: 0.5;
+  padding: 0 5px;
 }
 
 .text::before {
-  content: "запущен";
+  content: "Остановить";
 }
 
-input[type="checkbox"]:checked + .text::before {
-  content: "остановлен";
+input[name="stop"]:checked + .text::before {
+  content: "Запустить";
 }
 
-.stop:hover > input[type="checkbox"]:checked + .text::before {
-  content: "запустить";
+.buttons button {
+  background-color: var(--form-color);
+  color: var(--text-color);
+  visibility: hidden;
+  outline: none;
+}
+
+.buttons:has(input[name="stop"]:checked) button {
+  visibility: visible;
 }

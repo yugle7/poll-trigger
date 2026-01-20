@@ -154,7 +154,7 @@ Telegram.WebApp.MainButton.onClick(async () => {
 
       return result;
     })
-    .filter((f) => f.chat);
+    .filter((f) => f.chat || f.what);
 
   url.searchParams.set("forms", JSON.stringify(data));
   await fetch(url);

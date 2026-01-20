@@ -5,6 +5,7 @@ Telegram.WebApp.onEvent("themeChanged", function () {
 
 let params = new URLSearchParams(Telegram.WebApp.initData);
 let user = JSON.parse(decodeURIComponent(params.get("user")));
+console.log(user);
 
 let hash = params.get("hash");
 params.delete("hash");

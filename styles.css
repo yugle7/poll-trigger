@@ -186,6 +186,7 @@ input[name="stop"]:checked + .text::before {
   color: var(--text-color);
   visibility: hidden;
   outline: none;
+  font-size: 16px;
 }
 
 .buttons:has(input[name="stop"]:checked) button {

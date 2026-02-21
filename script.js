@@ -5,7 +5,6 @@ Telegram.WebApp.onEvent("themeChanged", function () {
 
 let params = new URLSearchParams(Telegram.WebApp.initData);
 let user = JSON.parse(decodeURIComponent(params.get("user")));
-console.log(user);
 
 let hash = params.get("hash");
 params.delete("hash");
@@ -60,7 +59,6 @@ function addOptions(form, chat = null) {
     form.querySelector('input[name="what"]').value = f.what;
     form.querySelector('input[name="id"]').value = f.id;
     form.querySelector('input[name="time_zone"]').value = f.time_zone;
-
     form.querySelector('input[name="where"]').value = f.where || "";
     form.querySelector('input[name="start"]').value = f.start || "";
     form.querySelector('input[name="create"]').value = f.create || "";
